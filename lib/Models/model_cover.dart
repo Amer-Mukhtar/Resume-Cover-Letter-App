@@ -1,4 +1,4 @@
-class newCoverLetterModel {
+class CoverLetterModel {
   String title;
   String summary;
   String? firstName;
@@ -6,8 +6,9 @@ class newCoverLetterModel {
   String? phoneNumber;
   String? email;
   String? address;
+  double? fullness;
 
-  newCoverLetterModel({
+  CoverLetterModel({
     required this.title,
     required this.summary,
     this.firstName,

@@ -6,12 +6,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:resume_maker/Models/model_resume.dart';
 import 'package:resume_maker/Screens/add_resume_screen/resume_view_model.dart';
+import '../../Utility/widgets/AlertSnackBar.dart';
+import '../../Utility/widgets/TextFieldHintRed.dart';
+import '../../Utility/widgets/TextFieldValidator.dart';
+import '../../Utility/widgets/TextfieldSummary.dart';
+import '../../Utility/widgets/additionalOptionsButton.dart';
+import '../../Utility/widgets/reorderButton.dart';
+import '../../Utility/widgets/textFieldSummaryNON.dart';
 import '../templates/black_white.dart';
 import '../templates/blue.dart';
 
 
+String _errorText='';
 
 List photo= [
   {'image':'assets/images/template1.png',
@@ -33,8 +42,8 @@ class Resume_Details extends StatefulWidget
   State<Resume_Details> createState() => _Resume_DetailsState();
 }
 
-class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProviderStateMixin {
-  final ResumeViewModelProvider resumeViewModel = ResumeViewModelProvider();
+class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProviderStateMixin  {
+  late ResumeViewModelProvider resumeViewModel;
 
 
   late TabController _tabController;
@@ -77,41 +86,77 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
   @override
   void initState() {
     super.initState();
+
+
+    resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
     textControllerFirstName =TextEditingController(text: widget.newResumeMdoel.intro?.firstName);
-    textControllerFirstName.addListener(() => widget.newResumeMdoel.intro?.firstName = textControllerFirstName.text);
+    textControllerFirstName.addListener(()
+    {
+      final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+      resumeViewModel.AddFirstName(widget.index, textControllerFirstName.text);
+    resumeViewModel.updateFullness(widget.newResumeMdoel);});
+
+
 
     textControllerLastName =TextEditingController(text: widget.newResumeMdoel.intro?.lastName);
-    textControllerLastName.addListener(() => widget.newResumeMdoel.intro?.lastName = textControllerLastName.text);
+    textControllerLastName.addListener(()
+    {
+        final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+      resumeViewModel.AddLastName(widget.index, textControllerLastName.text);
+    resumeViewModel.updateFullness(widget.newResumeMdoel);
+    });
 
-    textControllerSummary =TextEditingController(text: widget.newResumeMdoel.intro?.lastName);
-    textControllerSummary.addListener(() => widget.newResumeMdoel.intro?.summary = textControllerSummary.text);
+
+    textControllerSummary =TextEditingController(text: widget.newResumeMdoel.intro?.summary);
+    textControllerSummary.addListener(()
+    {
+    final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+      resumeViewModel.AddSummaryName(widget.index, textControllerSummary.text);
+    resumeViewModel.updateFullness(widget.newResumeMdoel);
+    });
+
+
 
     textControllerEmail =TextEditingController(text: widget.newResumeMdoel.contact?.address);
-    textControllerEmail.addListener(() => widget.newResumeMdoel.contact?.address = textControllerEmail.text);
+    textControllerEmail.addListener(() {
+    final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+    resumeViewModel.AddEmail(widget.index, textControllerEmail.text);
+    resumeViewModel.updateFullness(widget.newResumeMdoel);
+    });
 
 
     textControllerPhoneNumber =TextEditingController(text: widget.newResumeMdoel.contact?.phoneNumber);
-    textControllerPhoneNumber.addListener(() => widget.newResumeMdoel.contact?.phoneNumber = textControllerPhoneNumber.text);
+    textControllerPhoneNumber.addListener(() {
+        final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+      resumeViewModel.AddPhone(widget.index, textControllerPhoneNumber.text);
+    resumeViewModel.updateFullness(widget.newResumeMdoel);});
 
     textControllerWebsite =TextEditingController(text: widget.newResumeMdoel.contact?.website);
-    textControllerWebsite.addListener(() => widget.newResumeMdoel.contact?.website = textControllerWebsite.text);
+    textControllerWebsite.addListener(() {
+    final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+      resumeViewModel.AddWebsite(widget.index, textControllerWebsite.text);
+    resumeViewModel.updateFullness(widget.newResumeMdoel);});
 
 
     textControllerAddress =TextEditingController(text: widget.newResumeMdoel.contact?.email);
-    textControllerAddress.addListener(() => widget.newResumeMdoel.contact?.email = textControllerAddress.text);
+    textControllerAddress.addListener(()
+    {
+    final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+      resumeViewModel.AddAddress(widget.index, textControllerAddress.text);
+    resumeViewModel.updateFullness(widget.newResumeMdoel);});
 
 
 
 
 
 
-    _tabController = TabController(length: 8, vsync: this);
+    _tabController = TabController(length: 9, vsync: this);
+   // _tabController.addListener(_handleTabChange);
  }
  late final ResumeViewModelProvider view;
 
   @override
   void dispose() {
-
     textControllerCompany.dispose();
     textControllerPosition.dispose();
     textControllerLocation.dispose();
@@ -131,13 +176,70 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
   }
 
 
+  Color _borderColorIntro = Colors.grey;
+  Color _borderColorContact = Colors.grey;
+  Color? _profileAvatarOuterBorder = Color.lerp(Colors.black, Colors.white, 0.3);
 
+  void _handleTabChange(int index) {
+    print('herwe');
+    if (index == 0)
+    {
+      print('1');
+      setState(()
+      {
+        _borderColorIntro = Colors.red;
+        ScaffoldMessenger.of(context).showSnackBar(
+          AlertSnackBar('Required fields cannot be left empty.',Colors.red,Colors.white),
+        );
+
+      });
+
+      Future.delayed(Duration(seconds: 3), () {
+        setState(()
+        {
+          _borderColorIntro = Colors.grey;
+        });
+      });
+    }
+    else if (index == 1)
+    {
+
+      print('1');
+      setState(()
+      {
+        _borderColorContact = Colors.red;
+        ScaffoldMessenger.of(context).showSnackBar(
+          AlertSnackBar('Required fields cannot be left empty.',Colors.red,Colors.white),
+        );
+      });
+
+      Future.delayed(Duration(seconds: 3), () {
+        setState(()
+        {
+          _borderColorContact = Colors.grey;
+        });
+      });
+    }
+    else if(index==5)
+      {
+        ScaffoldMessenger.of(context).showSnackBar(
+          AlertSnackBar('Skill cannot be left empty.',Colors.red,Colors.white),
+        );
+      }
+    else if(index==6)
+    {
+      ScaffoldMessenger.of(context).showSnackBar(
+        AlertSnackBar('Language cannot be left empty.',Colors.red,Colors.white),
+      );
+    }
+  }
   File ? _select;
   bool Cdate=false;
 
   @override
   Widget build(BuildContext context)
   {
+
     print('here');
     return Scaffold(
       backgroundColor: Colors.black,
@@ -152,7 +254,8 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: Colors.white60),
             ),
-            child: IconButton(onPressed: (){setState(() {
+            child: IconButton(onPressed: (){setState(()
+            {
               Navigator.pop(context);
             });},
               icon: const Icon(CupertinoIcons.arrow_left,
@@ -185,7 +288,7 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                     vertical: 15),
               ),
               onPressed: () {
-                _tabController.animateTo((_tabController.index + 1) % 8);
+                _tabController.animateTo((_tabController.index + 1) % 9);
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -219,7 +322,7 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
           backgroundColor: Colors.black,
           body: Container(
             child: DefaultTabController(
-              length: 8,
+              length: 9,
               child: Column(children:
               [
                 TabBar(
@@ -238,7 +341,8 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                     tabs: [
                       Tab(
                         child: Container(
-                          child: const Row(children: [
+                          child: const Row(children:
+                          [
                             Icon(FontAwesomeIcons.addressCard,size: 20,),
                             SizedBox(width: 10,),
                             Text('Intro')
@@ -299,7 +403,16 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                             Text('Languages')
                           ],),
                         ),
-                      ),//Languages
+                      ),
+                      Tab(
+                        child: Container(
+                          child: const Row(children: [
+                            Icon(CupertinoIcons.doc_circle,size: 20,),
+                            SizedBox(width: 10,),
+                            Text('Refrences')
+                          ],),
+                        ),
+                      ),////Languages
                       Tab(
                         child: Container(
                           child: const Row(children: [
@@ -328,100 +441,115 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                                 children: [
                                   const SizedBox(height: 20,),
                                   Center(
-                                      child: Stack(children: [
-                                        CircleAvatar(
-                                          backgroundImage: widget.newResumeMdoel.profile_image == null
-                                              ? const AssetImage('assets/images/profile.png') as ImageProvider
-                                              : FileImage(File(widget.newResumeMdoel.profile_image!.path)),
+                                    child: Stack(
+                                      children: [
+                                        widget.newResumeMdoel.profile_image == null
+                                            ? Container(
+                                          width: 100.0,
+                                          height: 100.0,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: _profileAvatarOuterBorder,//reload
+                                          ),
+                                          child: Stack(
+                                            alignment: Alignment.center,
+                                            children: [
+                                              // Outer border
+                                              Container(
+                                                width: 95.0,
+                                                height: 95.0,
+                                                decoration: const BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                              // Inner border
+                                              Container(
+                                                width: 90.0,
+                                                height: 90.0,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Color.lerp(Colors.black, Colors.white, 0.5),//
+                                                ),
+                                              ),
+                                              // Profile CircleAvatar
+                                              CircleAvatar(
+                                                backgroundColor: Color.lerp(Colors.black, Colors.white, 0.3),
+                                                radius: 43.0,
+                                                child: Icon(Icons.person, size: 80.0, color: Color.lerp(Colors.black, Colors.white, 0.25)),//
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                            : CircleAvatar(
                                           radius: 50,
+                                          backgroundImage: MemoryImage(widget.newResumeMdoel.profile_image!),
+
                                         ),
-                                        Positioned(left: 70,top: 70,child: GestureDetector(onTap: (){imageSheet();},child: Container(decoration: BoxDecoration(borderRadius: BorderRadius.circular(20),color: Colors.blue),child: const Icon(CupertinoIcons.plus,color: Colors.white,),)))
-                                      ],)
+                                        Positioned(
+                                          left: 70,
+                                          top: 70,
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              imageSheet();
+                                            },
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(20),
+                                                color: Colors.blue,
+                                              ),
+                                              child: const Icon(
+                                                CupertinoIcons.plus,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                
+
+
+
+
                                   //First Name
-                                  Container(margin: const EdgeInsets.only(left: 20,right: 20,top: 10),child: Text('First Name',style: TextStyle(color: text,fontWeight: FontWeight.bold),)),
-                                  Theme(
-                                    data: ThemeData.dark(),
-                                    child: Container(
-                                      margin: const EdgeInsets.only(left: 20,right: 20,top: 10,bottom: 20),
-                                      height: 50,
-                                      width:double.infinity ,
-                                      child: TextFormField(
-                                        onChanged: (value){
-                                          resumeViewModel.updateFullness2(widget.newResumeMdoel);
-                                        },
-                                        controller: textControllerFirstName,
-                                        decoration: const InputDecoration(
-                                          labelText: 'Vitalik',
-                                          focusedBorder:OutlineInputBorder(
-                
-                                              borderSide: BorderSide(color: Colors.white)
-                
-                                          ) ,
-                                          border: OutlineInputBorder(),
-                                        ),
-                                        cursorColor: Colors.white,
-                                      ),
-                                    ),
+                                  CustomTextFieldHintRed(
+                                    labelText: 'First Name',
+                                    controller: textControllerFirstName,
+                                    KeyboardType: TextInputType.text,
+                                    hintText: 'Vitalik',
+                                    onChanged: (value) {
+                                      resumeViewModel.updateFullness(widget.newResumeMdoel);
+                                    }, color: _borderColorIntro,
                                   ),
-                
+
                                   //Last name
-                                  Container(margin: const EdgeInsets.only(left: 20,right: 20,top: 10),child: Text('Last Name',style: TextStyle(color: text,fontWeight: FontWeight.bold),)),
-                                  Theme(
-                                    data: ThemeData.dark(),
-                                    child: Container(
-                                      margin: const EdgeInsets.only(left: 20,right: 20,top: 10,bottom: 20),
-                                      height: 50,
-                                      width:double.infinity ,
-                                      child: TextFormField(
-                
-                                        controller: textControllerLastName,
-                                        decoration: const InputDecoration(
-                                          labelText: 'William',
-                                          focusedBorder:OutlineInputBorder(
-                                              borderSide: BorderSide(color: Colors.white)
-                
-                                          ) ,
-                                          border: OutlineInputBorder(),
-                                        ),
-                                        cursorColor: Colors.white,
-                                      ),
-                                    ),
+                                  CustomTextFieldHintRed(
+                                    labelText: 'Last Name',
+                                    KeyboardType: TextInputType.text,
+                                    controller: textControllerLastName,
+                                    hintText: 'William',
+                                    onChanged: (value) {
+                                      resumeViewModel.updateFullness(widget.newResumeMdoel);
+                                    }, color: _borderColorIntro,
                                   ),
-                
-                                  //summary
-                                  Container(margin: const EdgeInsets.only(left: 20,right: 20,top: 10),
-                                      child: Text('Summary',
-                                        style: TextStyle(color: text,fontWeight: FontWeight.bold),)),
-                                  Theme(
-                                    data: ThemeData.dark(),
-                                    child: Container(
-                                      margin: const EdgeInsets.only(left: 20,right: 20,top: 10,bottom: 20),
-                                      height: 50,
-                                      width:double.infinity ,
-                                      child: TextFormField(
-                
-                                        controller: textControllerSummary,
-                                        decoration: const InputDecoration(
-                                          labelText: 'UI Desginer based in LA',
-                                          focusedBorder:OutlineInputBorder(
-                                              borderSide: BorderSide(color: Colors.white)
-                
-                                          ) ,
-                                          border: OutlineInputBorder(),
-                                        ),
-                                        cursorColor: Colors.white,
-                                      ),
-                                    ),
-                                  )
-                
-                
+
+
+
+                                  CustomSummaryField(
+                                    height: 80.0,
+                                    labelText: 'Summary',
+                                    controller: textControllerSummary,
+                                    hintText: 'UI Designer based in LA',
+                                    onChanged: (value) {
+                                      resumeViewModel.updateFullness(widget.newResumeMdoel);
+                                    }, borderColor: _borderColorIntro,
+                                  ),
                                 ],),
                             ),
                           )
                       ),
-                
+
                       ///Contact
                       Scaffold(
                           backgroundColor: Colors.black,
@@ -431,103 +559,58 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                                 mainAxisAlignment: MainAxisAlignment.center,crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const SizedBox(height: 20,),
-                
+
                                   //Email Address
-                                  Container(margin: const EdgeInsets.only(left: 20,right: 20,top: 10),child: Text('Email Address',style: TextStyle(color: text,fontWeight: FontWeight.bold),)),
-                                  Theme(
-                                    data: ThemeData.dark(),
-                                    child: Container(
-                                      margin: const EdgeInsets.only(left: 20,right: 20,top: 10,bottom: 20),
-                                      height: 50,
-                                      width:double.infinity ,
-                                      child: TextFormField(
-                                        keyboardType: TextInputType.emailAddress,
-                                        controller: textControllerEmail,
-                                        decoration: const InputDecoration(
-                                          labelText: 'vialik@gmail.com',
-                                          focusedBorder:OutlineInputBorder(
-                                              borderSide: BorderSide(color: Colors.white)
-                                          ) ,
-                                          border: OutlineInputBorder(),
-                                        ),
-                                        cursorColor: Colors.white,
-                                      ),
-                                    ),
+                                  CustomTextFieldHintRed(
+                                    labelText: 'Email Address',
+                                    KeyboardType: TextInputType.emailAddress,
+                                    controller: textControllerEmail,
+                                    hintText: 'vialik@gmail.com',
+                                    onChanged: (value) {
+                                      resumeViewModel.updateFullness(widget.newResumeMdoel);
+                                    }, color: _borderColorContact,
                                   ),
-                
+
+
+
                                   //Phone Number
-                                  Container(margin: const EdgeInsets.only(left: 20,right: 20,top: 10),child: Text('Phone Number',style: TextStyle(color: text,fontWeight: FontWeight.bold),)),
-                                  Theme(
-                                    data: ThemeData.dark(),
-                                    child: Container(
-                                      margin: const EdgeInsets.only(left: 20,right: 20,top: 10,bottom: 20),
-                                      height: 50,
-                                      width:double.infinity ,
-                                      child: TextFormField(
-                                        keyboardType: TextInputType.phone,
-                                        controller: textControllerPhoneNumber,
-                                        decoration: const InputDecoration(
-                                          labelText: '234 233 254 325',
-                                          focusedBorder:OutlineInputBorder(
-                                              borderSide: BorderSide(color: Colors.white)
-                
-                                          ) ,
-                                          border: OutlineInputBorder(),
-                                        ),
-                                        cursorColor: Colors.white,
-                                      ),
-                                    ),
+                                  CustomTextFieldHintRed(
+                                    labelText: 'Phone Number',
+                                    KeyboardType: TextInputType.phone,
+                                    controller: textControllerPhoneNumber,
+                                    hintText: '+77234233254325',
+                                    onChanged: (value) {
+                                      resumeViewModel.updateFullness(widget.newResumeMdoel);
+                                    }, color: _borderColorContact,
                                   ),
-                
+
+
                                   //Personal Website
-                                  Container(margin: const EdgeInsets.only(left: 20,right: 20,top: 10),child: Text('Website',style: TextStyle(color: text,fontWeight: FontWeight.bold),)),
-                                  Theme(
-                                    data: ThemeData.dark(),
-                                    child: Container(
-                                      margin: const EdgeInsets.only(left: 20,right: 20,top: 10,bottom: 20),
-                                      height: 50,
-                                      width:double.infinity ,
-                                      child: TextFormField(
-                                        keyboardType: TextInputType.url,
-                                        controller: textControllerWebsite,
-                                        decoration: const InputDecoration(
-                                          labelText: 'vitalik.com',
-                                          focusedBorder:OutlineInputBorder(
-                                              borderSide: BorderSide(color: Colors.white)
-                
-                                          ) ,
-                                          border: OutlineInputBorder(),
-                                        ),
-                                        cursorColor: Colors.white,
-                                      ),
-                                    ),
+                                  CustomTextFieldHintRed(
+                                    labelText: 'Website',
+                                    KeyboardType: TextInputType.url,
+                                    controller: textControllerWebsite,
+                                    hintText: 'vitalik.com',
+                                    onChanged: (value) {
+                                      resumeViewModel.updateFullness(widget.newResumeMdoel);
+                                    }, color: _borderColorContact,
                                   ),
-                
+
+
                                   //Address
-                                  Container(margin: const EdgeInsets.only(left: 20,right: 20,top: 10),child: Text('Address',style: TextStyle(color: text,fontWeight: FontWeight.bold),)),
-                                  Theme(
-                                    data: ThemeData.dark(),
-                                    child: Container(
-                                      margin: const EdgeInsets.only(left: 20,right: 20,top: 10,bottom: 20),
-                                      height: 50,
-                                      width:double.infinity ,
-                                      child: TextFormField(
-                                        keyboardType: TextInputType.streetAddress,
-                                        controller: textControllerAddress,
-                                        decoration: const InputDecoration(
-                                          labelText: 'Los ANgeles,USA',
-                                          focusedBorder:OutlineInputBorder(
-                                              borderSide: BorderSide(color: Colors.white)
-                
-                                          ) ,
-                                          border: OutlineInputBorder(),
-                                        ),
-                                        cursorColor: Colors.white,
-                                      ),
-                                    ),
+                                  CustomTextFieldHintRed(
+                                    labelText: 'Address',
+                                    KeyboardType: TextInputType.streetAddress,
+                                    controller: textControllerAddress,
+                                    hintText: 'Los Angeles, USA',
+                                    onChanged: (value) {
+                                      resumeViewModel.updateFullness(widget.newResumeMdoel);
+                                    }, color: _borderColorContact,
                                   ),
-                
-                
+
+
+
+
                                 ],),
                             ),
                           )
@@ -558,185 +641,132 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                       ),
                     ),
                   ),
-                  body: Container(
+                  body:Container(
                     color: Colors.black,
-                    child: ReorderableListView(
-                      onReorder: (int oldIndex, int newIndex) {
-                        setState(() {
-                          if (newIndex > oldIndex) {
-                            newIndex -= 1;
-                          }
-                          final item = widget.newResumeMdoel.education.removeAt(oldIndex);
-                          widget.newResumeMdoel.education.insert(newIndex, item);
-                                                });
-                      },
-                      children: [
-                        if (widget.newResumeMdoel.education.isEmpty ?? true)
-                          SizedBox(
-                            width: double.infinity,
-                            key: const ValueKey('empty'),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Container(
-                                  margin: const EdgeInsets.only(top: 170),
-                                  height: 120,
-                                  width: 120,
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue[900],
-                                    borderRadius: BorderRadius.circular(60),
-                                  ),
-                                  child: const Icon(
-                                    FontAwesomeIcons.userGraduate,
-                                    color: Colors.blue,
-                                    size: 80,
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                const Text(
-                                  'No education added',
-                                  style: TextStyle(color: Colors.white, fontSize: 20),
-                                ),
-                              ],
-                            ),
-                          )
-                        else
-                          for (int index = 0; index < widget.newResumeMdoel.education.length; index++)
+                    child: widget.newResumeMdoel.education.isEmpty? Container(
+                      width: double.infinity,
+                      key: const ValueKey('empty'),
+                      color: Colors.black,alignment: Alignment.center,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
                             Container(
-                              key: ValueKey(widget.newResumeMdoel.education[index].schoolTitle),
-                              color: Colors.black,
-                              child: Column(
-                                children: [
-                                  const SizedBox(height: 20),
-                                  Container(
-                                    margin: const EdgeInsets.symmetric(horizontal: 20),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(20),
-                                          decoration: const BoxDecoration(
-                                            color: Color(0xFF454545),
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(10),
-                                              topRight: Radius.circular(10),
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                widget.newResumeMdoel.education[index].schoolTitle,
-                                                style: const TextStyle(color: Colors.white),
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(left: 10, top: 10),
-                                                child: Container(
-                                                  width: 30,
-                                                  height: 30,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.black,
-                                                    border: Border.all(color: Colors.white60),
-                                                    borderRadius: BorderRadius.circular(5),
-                                                  ),
-                                                  child: GestureDetector(
-                                                    onLongPress: () {
-                                                      // Handle long press
-                                                    },
-                                                    child: IconButton(
-                                                      icon: const Icon(
-                                                        Icons.more_vert,
-                                                        color: Colors.white,
-                                                        size: 12,
-                                                      ),
-                                                      onPressed: () {
-                                                        Education_dot(index);
-                                                      },
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          padding: const EdgeInsets.all(20),
-                                          decoration: const BoxDecoration(
-                                            color: Colors.black,
-                                            borderRadius: BorderRadius.only(
-                                              bottomLeft: Radius.circular(10),
-                                              bottomRight: Radius.circular(10),
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  const Text(
-                                                    'Major',
-                                                    style: TextStyle(color: Colors.white60, fontSize: 10),
-                                                  ),
-                                                  Text(
-                                                    widget.newResumeMdoel.education[index].major,
-                                                    style: const TextStyle(color: Colors.white),
-                                                  ),
-                                                  Text(
-                                                    widget.newResumeMdoel.education[index].to.toString(),
-                                                    style: const TextStyle(color: Colors.white),
-                                                  ),
-                                                ],
-                                              ),
-                                              Container(
-                                                width: 30,
-                                                height: 30,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.black,
-                                                  border: Border.all(color: Colors.white60),
-                                                  borderRadius: BorderRadius.circular(5),
-                                                ),
-                                                child: IconButton(
-                                                  icon: const Icon(
-                                                    CupertinoIcons.arrow_up_arrow_down,
-                                                    color: Colors.blue,
-                                                    size: 15,
-                                                  ),
-                                                  onPressed: () {
-                                                    // Handle reorder button press
-                                                    // You need to implement reordering logic here
-                                                  },
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    decoration: const BoxDecoration(
-                                      color: Colors.black,
-                                      borderRadius: BorderRadius.only(
-                                        bottomLeft: Radius.circular(10),
-                                        bottomRight: Radius.circular(10),
-                                      ),
-                                    ),
-                                    margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-                                    alignment: Alignment.topLeft,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(left: 20, bottom: 10, right: 20),
-                                      child: Text(
-                                        widget.newResumeMdoel.education[index].schoolTitle ?? ' ',
-                                        style: const TextStyle(color: Colors.white),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                              height: 120,
+                              width: 120,
+                              decoration: BoxDecoration(
+                                color: Colors.blue[900],
+                                borderRadius: BorderRadius.circular(60),
+                              ),
+                              child: const Icon(
+                                FontAwesomeIcons.userGraduate,
+                                color: Colors.blue,
+                                size: 80,
                               ),
                             ),
-                      ],
+                            const SizedBox(height: 10),
+                            const Text(
+                              'No education added',
+                              style: TextStyle(color: Colors.white, fontSize: 20),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ) :Container(
+                      color: Colors.black,
+                      child: ReorderableListView(
+                        onReorder: (int oldIndex, int newIndex) {
+                          setState(() {
+                            if (newIndex > oldIndex) {
+                              newIndex -= 1;
+                            }
+                            final item = widget.newResumeMdoel.education.removeAt(oldIndex);
+                            widget.newResumeMdoel.education.insert(newIndex, item);
+                                                  });
+                        },
+                        children: [
+
+                            for (int index = 0; index < widget.newResumeMdoel.education.length; index++)
+                              Container(
+                                key: ValueKey(widget.newResumeMdoel.education[index].schoolTitle),
+                                color: Colors.black,
+                                child: Column(
+                                  children: [
+                                    const SizedBox(height: 20),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
+                                          color: Colors.white24,
+                                          width:1,
+
+                                        ),),
+                                      margin: const EdgeInsets.symmetric(horizontal: 20),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.all(20),
+                                            decoration: const BoxDecoration(
+                                              color: Color(0xFF454545),
+                                              borderRadius: BorderRadius.only(
+                                                topLeft: Radius.circular(10),
+                                                topRight: Radius.circular(10),
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Container(constraints: const BoxConstraints(maxWidth: 250),child: Text(
+                                                  widget.newResumeMdoel.education[index].schoolTitle,
+                                                  style: const TextStyle(color: Colors.white,),maxLines: 1,overflow: TextOverflow.ellipsis,
+                                                ),),
+                                                AdditonalOptions(onPressed: () { Education_dot(index); },)
+
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.all(20),
+                                            decoration: const BoxDecoration(
+                                              color: Colors.black,
+                                              borderRadius: BorderRadius.only(
+                                                bottomLeft: Radius.circular(10),
+                                                bottomRight: Radius.circular(10),
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    const Text(
+                                                      'Major',
+                                                      style: TextStyle(color: Colors.white60, fontSize: 10),
+                                                    ),
+                                                    Container(constraints: const BoxConstraints(maxWidth: 250),child: Text(
+                                                      widget.newResumeMdoel.education[index].major,
+                                                      style: const TextStyle(color: Colors.white),
+                                                      maxLines: 1,overflow: TextOverflow.ellipsis,
+                                                    ),)
+
+                                                  ],
+                                                ),
+                                                reorderButton(context)
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+
+                                  ],
+                                ),
+                              ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -770,36 +800,38 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                       color: Colors.black,
                       child: widget.newResumeMdoel.experience.isEmpty
                           ? Container(
-                        width: double.infinity,
-                        key: const ValueKey('empty'),
-                        margin: const EdgeInsets.only(top: 0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              margin: const EdgeInsets.only(top: 20),
-                              height: 120,
-                              width: 120,
-                              decoration: BoxDecoration(
-                                color: Colors.blue[900],
-                                borderRadius: BorderRadius.circular(60),
+                        width: double.infinity,color: Colors.black,
+                        key: const ValueKey('empty'),alignment: Alignment.center,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.only(top: 10),
+                                height: 120,
+                                width: 120,
+                                decoration: BoxDecoration(
+                                  color: Colors.blue[900],
+                                  borderRadius: BorderRadius.circular(60),
+                                ),
+                                child: const Icon(
+                                  FontAwesomeIcons.briefcase,
+                                  color: Colors.blue,
+                                  size: 80,
+                                ),
                               ),
-                              child: const Icon(
-                                FontAwesomeIcons.briefcase,
-                                color: Colors.blue,
-                                size: 80,
+                              const SizedBox(height: 10),
+                              const Text(
+                                'No experience added',
+                                style: TextStyle(color: Colors.white, fontSize: 20),
                               ),
-                            ),
-                            const SizedBox(height: 10),
-                            const Text(
-                              'No experience added',
-                              style: TextStyle(color: Colors.white, fontSize: 20),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       )
                           : ReorderableListView(
+
                         onReorder: (int oldIndex, int newIndex) {
                           if (newIndex > oldIndex) {
                             newIndex -= 1;
@@ -812,12 +844,20 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                         children: [
                           for (int index = 0; index < widget.newResumeMdoel.experience.length; index++)
                             Container(
-                              key: ValueKey('experience_$index'), // Unique key based on index
+                              key: ValueKey('experience_$index'),
                               color: Colors.black,
                               child: Column(
                                 children: [
+
                                   const SizedBox(height: 20),
                                   Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: Colors.white24,
+                                        width:1,
+                                      ),
+                                    ),
                                     margin: const EdgeInsets.symmetric(horizontal: 20),
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -837,38 +877,16 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                                               Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                  Text(
-                                                    widget.newResumeMdoel.experience[index].company ?? '',
-                                                    style: const TextStyle(color: Colors.white),
-                                                  ),
+                                                 Container(constraints: const BoxConstraints(maxWidth: 250),
+                                                   child:  Text(
+                                                   widget.newResumeMdoel.experience[index].company ?? '',
+                                                   style: const TextStyle(color: Colors.white),
+                                                   maxLines: 1,overflow: TextOverflow.ellipsis,
+                                                 ),),
                                                 ],
                                               ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(left: 10, top: 10),
-                                                child: Container(
-                                                  width: 30,
-                                                  height: 30,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.black,
-                                                    border: Border.all(color: Colors.white60),
-                                                    borderRadius: BorderRadius.circular(5),
-                                                  ),
-                                                  child: IconButton(
-                                                    icon: const Icon(
-                                                      Icons.more_vert,
-                                                      color: Colors.white,
-                                                      size: 12,
-                                                    ),
-                                                    onPressed: () {
-                                                     setState(() {
-                                                       experience_dot(index);
-                                                       update();
-                                                     });
-                                                     update();
-                                                    },
-                                                  ),
-                                                ),
-                                              ),
+                                              AdditonalOptions(onPressed: () { experience_dot(index); },)
+
                                             ],
                                           ),
                                         ),
@@ -883,60 +901,61 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                                               Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
+                                                  const Text(
+                                                    'Position',
+                                                    style: TextStyle(color: Colors.white60, fontSize: 10),
+                                                  ),
                                                   Row(
                                                     children: [
-                                                      Text(
+
+                                                      Container(constraints: const BoxConstraints(maxWidth: 250),child:Text(
                                                         widget.newResumeMdoel.experience[index].position ?? '',
-                                                        style: const TextStyle(color: Colors.white60, fontSize: 12),
-                                                      ),
+                                                        style: const TextStyle(color: Colors.white, fontSize: 12),
+                                                      maxLines: 1,overflow:TextOverflow.ellipsis
+                                                      ),),
                                                     ],
                                                   ),
                                                 ],
                                               ),
-                                              Container(
-                                                width: 30,
-                                                height: 30,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.black,
-                                                  border: Border.all(color: Colors.white60),
-                                                  borderRadius: BorderRadius.circular(5),
-                                                ),
-                                                child: IconButton(
-                                                  icon: const Icon(
-                                                    CupertinoIcons.arrow_up_arrow_down,
-                                                    color: Colors.blue,
-                                                    size: 15,
-                                                  ),
-                                                  onPressed: () {
-                                                    // Handle reorder button press
-                                                    // You need to implement reordering logic here
-                                                  },
-                                                ),
-                                              ),
+                                              reorderButton(context)
                                             ],
+                                          ),
+                                        ),
+                                        Container(
+                                          decoration: const BoxDecoration(
+                                            color: Colors.black,
+                                            borderRadius: BorderRadius.only(
+                                              bottomLeft: Radius.circular(10),
+                                              bottomRight: Radius.circular(10),
+                                            ),
+                                          ),
+
+                                          alignment: Alignment.topLeft,
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 20, bottom: 10, right: 20),
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.start,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                const Text(
+                                                  'Description',
+                                                  style: TextStyle(color: Colors.white60, fontSize: 10,),
+                                                ),
+                                                Text(
+                                                  widget.newResumeMdoel.experience[index].description ?? ' ',
+                                                  style: const TextStyle(color: Colors.white),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                )
+
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                  Container(
-                                    decoration: const BoxDecoration(
-                                      color: Colors.black,
-                                      borderRadius: BorderRadius.only(
-                                        bottomLeft: Radius.circular(10),
-                                        bottomRight: Radius.circular(10),
-                                      ),
-                                    ),
-                                    margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-                                    alignment: Alignment.topLeft,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(left: 20, bottom: 10, right: 20),
-                                      child: Text(
-                                        widget.newResumeMdoel.experience[index].description ?? ' ',
-                                        style: const TextStyle(color: Colors.white),
-                                      ),
-                                    ),
-                                  ),
+
                                 ],
                               ),
                             ),
@@ -970,7 +989,40 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                         ),
                         body: Container(
                           color: Colors.black,
-                          child: ReorderableListView(
+                          child: widget.newResumeMdoel.certifications.isEmpty?
+                          Container(
+                            width: double.infinity,
+                            key: const ValueKey('empty'),
+                           alignment: Alignment.center,
+                            color: Colors.black,
+                            child: SingleChildScrollView(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    margin: const EdgeInsets.only(top: 20),
+                                    height: 120,
+                                    width: 120,
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue[900],
+                                      borderRadius: BorderRadius.circular(60),
+                                    ),
+                                    child: const Icon(
+                                      CupertinoIcons.briefcase,
+                                      color: Colors.blue,
+                                      size: 80,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  const Text(
+                                    'No certifications added',
+                                    style: TextStyle(color: Colors.white, fontSize: 20),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ) :ReorderableListView(
                             onReorder: (int oldIndex, int newIndex) {
                               if (newIndex > oldIndex) {
                                 newIndex -= 1;
@@ -981,38 +1033,7 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                               });
                             },
                             children: [
-                              if (widget.newResumeMdoel.certifications.isEmpty)
-                                Container(
-                                  width: double.infinity,
-                                  key: const ValueKey('empty'),
-                                  margin: const EdgeInsets.only(top: 170),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        margin: const EdgeInsets.only(top: 20),
-                                        height: 120,
-                                        width: 120,
-                                        decoration: BoxDecoration(
-                                          color: Colors.blue[900],
-                                          borderRadius: BorderRadius.circular(60),
-                                        ),
-                                        child: const Icon(
-                                          CupertinoIcons.briefcase,
-                                          color: Colors.blue,
-                                          size: 80,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 10),
-                                      const Text(
-                                        'No certifications added',
-                                        style: TextStyle(color: Colors.white, fontSize: 20),
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              else
+
                                 for (int index = 0; index < widget.newResumeMdoel.certifications.length; index++)
                                   Container(
                                     key: ValueKey('certification_$index'), // Unique key based on index
@@ -1021,6 +1042,7 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                                       children: [
                                         const SizedBox(height: 20),
                                         Container(
+
                                           margin: const EdgeInsets.symmetric(horizontal: 20),
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1028,45 +1050,22 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                                               Container(
                                                 padding: const EdgeInsets.all(20),
                                                 decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                      color: Colors.white24,
+                                                      width:1,
+                                                    ),
                                                   color: const Color(0xFF454545),
                                                   borderRadius: BorderRadius.circular(20),
                                                 ),
                                                 child: Row(
                                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                   children: [
-                                                    Text(
+                                                    Container(constraints: const BoxConstraints(maxWidth: 250),child: Text(
                                                       widget.newResumeMdoel.certifications[index].certificationName ?? '',
                                                       style: const TextStyle(color: Colors.white),
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets.only(left: 10, top: 10),
-                                                      child: Container(
-                                                        width: 30,
-                                                        height: 30,
-                                                        decoration: BoxDecoration(
-                                                          color: Colors.black,
-                                                          border: Border.all(color: Colors.white60),
-                                                          borderRadius: BorderRadius.circular(5),
-                                                        ),
-                                                        child: GestureDetector(
-                                                          onLongPress: () {
-                                                            // Handle long press
-                                                          },
-                                                          child: IconButton(
-                                                            icon: const Icon(
-                                                              Icons.more_vert,
-                                                              color: Colors.white,
-                                                              size: 12,
-                                                            ),
-                                                            onPressed: () {
-                                                              setState(() {
-                                                                certification_edit(index);
-                                                              });
-                                                            },
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
+                                                      maxLines: 1,overflow: TextOverflow.ellipsis,
+                                                    ),),
+                                                    AdditonalOptions(onPressed: () { certification_dot(index); },)
                                                   ],
                                                 ),
                                               ),
@@ -1077,8 +1076,7 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                                     ),
                                   ),
                             ],
-                          )
-
+                          ),
                         ),
                       ),
 
@@ -1105,9 +1103,45 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                       ),
                     ),
                   ),
-                  body: Container(
+                  body:Container(
                     color: Colors.black,
-                    child: ReorderableListView(
+                    child: widget.newResumeMdoel.skills.isEmpty ?
+                    Container(
+                    height: MediaQuery.of(context).size.height,
+                                  color: Colors.black,
+                                  alignment: Alignment.center,
+                                  width: double.infinity,
+                                  key: const ValueKey('empty'),
+                                  margin: const EdgeInsets.only(top: 0),
+                                  child: Align( // Use Align to center the Column
+                                    alignment: Alignment.center,
+                                    child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min, // Ensure the column sizes to its children
+                      children: [
+                        Container(
+                          height: 120,
+                          width: 120,
+                          decoration: BoxDecoration(
+                            color: Colors.blue[900],
+                            borderRadius: BorderRadius.circular(60),
+                          ),
+                          child: const Icon(
+                            FontAwesomeIcons.addressCard,
+                            color: Colors.blue,
+                            size: 80,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'No Skills added',
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ),
+                      ],
+                    ),
+                                    ),
+                                  ),
+                                ) : ReorderableListView(
                       onReorder: (int oldIndex, int newIndex) {
                         setState(() {
                           if (newIndex > oldIndex) {
@@ -1118,162 +1152,73 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                         });
                       },
                       children: <Widget>[
-                        if (widget.newResumeMdoel.skills.isEmpty)
-                          SizedBox(
-                            width: double.infinity,
-                            key: const ValueKey('empty'),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Container(
-                                  margin: const EdgeInsets.only(top: 170),
-                                  height: 120,
-                                  width: 120,
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue[900],
-                                    borderRadius: BorderRadius.circular(60),
-                                  ),
-                                  child: const Icon(
-                                    FontAwesomeIcons.addressCard,
-                                    color: Colors.blue,
-                                    size: 80,
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                const Text(
-                                  'No skills added',
-                                  style: TextStyle(color: Colors.white, fontSize: 20),
-                                ),
-                              ],
-                            ),
-                          )
-                        else
-                          for (var index = 0; index < widget.newResumeMdoel.skills.length; index++)
+
+
+
+                          for (int index = 0; index < widget.newResumeMdoel.skills.length; index++)
                             Container(
-                              key: ValueKey(widget.newResumeMdoel.skills[index]),
+                              key: ValueKey('language_$index'), // Unique key based on index
                               color: Colors.black,
                               child: Column(
                                 children: [
                                   const SizedBox(height: 20),
                                   Container(
-                                      width: double.infinity,
+                                    padding: const EdgeInsets.only(bottom: 10),
+                                    decoration: BoxDecoration(border: Border.all(
+                                      color: Colors.white24,
+                                      width:1,
+                                    ),borderRadius: BorderRadius.circular(20)
+                                    ),
                                     margin: const EdgeInsets.symmetric(horizontal: 20),
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.stretch,
                                       children: [
                                         Container(
                                           padding: const EdgeInsets.all(20),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFF454545),
-                                            borderRadius: BorderRadius.circular(20),
+                                          decoration: const BoxDecoration(
+
+                                            color: Color(0xFF454545),
+                                            borderRadius: BorderRadius.only(topRight: Radius.circular(20),topLeft: Radius.circular(20)),
                                           ),
                                           child: Row(
                                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                             children: [
-                                              Text(
-                                                widget.newResumeMdoel.skills[index].skillName ?? '',
-                                                style: const TextStyle(color: Colors.white),
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(left: 10, top: 10),
-                                                child: Container(
-                                                  width: 30,
-                                                  height: 30,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.black,
-                                                    border: Border.all(color: Colors.white60),
-                                                    borderRadius: BorderRadius.circular(5),
+                                             Container(constraints: const BoxConstraints(maxWidth: 250),child: Text(
+                                               widget.newResumeMdoel.skills[index].skillName ?? '',
+                                               style: const TextStyle(color: Colors.white),
+                                             maxLines:1,
+                                               overflow:TextOverflow.ellipsis
+
+                                             ),),
+                                              AdditonalOptions(onPressed: (){
+                                                skillDot(index);
+                                              },)
+                                            ],
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.all(20),
+                                          decoration: const BoxDecoration(
+                                            color: Colors.black,
+                                            borderRadius: BorderRadius.only(
+                                              bottomLeft: Radius.circular(10),
+                                              bottomRight: Radius.circular(10),
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Column(
+                                                children: [
+                                                  const Text(
+                                                    'Level',
+                                                    style: TextStyle(color: Colors.white60, fontSize: 14),
                                                   ),
-                                                  child: GestureDetector(
-                                                    onLongPress: () {
-                                                      // Handle long press
-                                                    },
-                                                    child: IconButton(
-                                                      icon: const Icon(
-                                                        Icons.more_vert,
-                                                        color: Colors.white,
-                                                        size: 12,
-                                                      ),
-                                                      onPressed: () {
-                                                        showModalBottomSheet(
-                                                          context: context,
-                                                          builder: (BuildContext context) {
-                                                            return Container(
-                                                              decoration: const BoxDecoration(
-                                                                borderRadius: BorderRadius.only(
-                                                                  topRight: Radius.circular(20),
-                                                                  topLeft: Radius.circular(20),
-                                                                ),
-                                                                color: Color(0xFF454545),
-                                                              ),
-                                                              width: double.infinity,
-                                                              child: FractionallySizedBox(
-                                                                child: Container(
-                                                                  decoration: BoxDecoration(
-                                                                    color: const Color(0xFF454545),
-                                                                    borderRadius: BorderRadius.circular(20),
-                                                                  ),
-                                                                  child: Column(
-                                                                    mainAxisSize: MainAxisSize.min,
-                                                                    children: [
-                                                                      TextButton(
-                                                                        onPressed: () {
-                                                                          setState(() {
-                                                                            rename_skill(index);
-                                                                          });
-                                                                        },
-                                                                        style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                                                                        child: const ListTile(
-                                                                          leading: Icon(Icons.edit, color: Colors.white),
-                                                                          title: Text(
-                                                                            'Rename',
-                                                                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      const Divider(height: 1, color: Colors.white24),
-                                                                      TextButton(
-                                                                        onPressed: () {
-                                                                          setState(() {
-                                                                            widget.newResumeMdoel.skills.removeAt(index);
-                                                                          });
-                                                                          Navigator.pop(context);
-                                                                        },
-                                                                        style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                                                                        child: const ListTile(
-                                                                          leading: Icon(Icons.delete, color: Colors.red),
-                                                                          title: Text(
-                                                                            'Delete',
-                                                                            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      const Divider(height: 1, color: Colors.white24),
-                                                                      TextButton(
-                                                                        onPressed: () {
-                                                                          Navigator.pop(context);
-                                                                        },
-                                                                        style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                                                                        child: const ListTile(
-                                                                          title: Text(
-                                                                            'Cancel',
-                                                                            style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold),
-                                                                            textAlign: TextAlign.center,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            );
-                                                          },
-                                                        );
-                                                      },
-                                                    ),
+                                                  Text(
+                                                    widget.newResumeMdoel.skills[index].level ?? '',
+                                                    style: const TextStyle(color: Colors.white, fontSize: 10),
                                                   ),
-                                                ),
+                                                ],
                                               ),
                                             ],
                                           ),
@@ -1315,42 +1260,48 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                     body: Container(
                       color: Colors.black,
                       child: widget.newResumeMdoel.languages.isEmpty
-                          ? SizedBox(
-                        width: double.infinity,
-                        key: const ValueKey('empty'),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              margin: const EdgeInsets.only(top: 0),
-                              height: 120,
-                              width: 120,
-                              decoration: BoxDecoration(
-                                color: Colors.blue[900],
-                                borderRadius: BorderRadius.circular(60),
-                              ),
-                              child: const Icon(
-                                FontAwesomeIcons.language,
-                                color: Colors.blue,
-                                size: 80,
-                              ),
+                          ? Center(
+                            child: Container(
+                            color: Colors.black,
+                            width: double.infinity,
+                            key: const ValueKey('empty'),
+                            margin: const EdgeInsets.only(bottom: 30),
+                            child: SingleChildScrollView(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children:
+                              [
+                                Container(
+                                  margin: const EdgeInsets.only(top: 20),
+                                  height: 120,
+                                  width: 120,
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue[900],
+                                    borderRadius: BorderRadius.circular(60),
+                                  ),
+                                  child: const Icon(
+                                    FontAwesomeIcons.language,
+                                    color: Colors.blue,
+                                    size: 80,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                const Text(
+                                  'No Languages added',
+                                  style: TextStyle(color: Colors.white, fontSize: 20),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 10),
-                            const Text(
-                              'No languages added',
-                              style: TextStyle(color: Colors.white, fontSize: 20),
-                            ),
-                          ],
-                        ),
-                      )
+                                                    ),
+                                                  ),
+                          )
                           : ReorderableListView(
                         onReorder: (int oldIndex, int newIndex) {
                           if (newIndex > oldIndex) {
                             newIndex -= 1;
                           }
                           setState(() {
-                            resumeViewModel.getLength(widget.index);
                             final item = widget.newResumeMdoel.languages.removeAt(oldIndex);
                             widget.newResumeMdoel.languages.insert(newIndex, item);
                           });
@@ -1364,140 +1315,35 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                                 children: [
                                   const SizedBox(height: 20),
                                   Container(
+                                    padding: const EdgeInsets.only(bottom: 10),
+                                    decoration: BoxDecoration(border: Border.all(
+                                      color: Colors.white24,
+                                      width:1,
+                                    ),borderRadius: BorderRadius.circular(20)
+                                    ),
                                     margin: const EdgeInsets.symmetric(horizontal: 20),
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.stretch,
                                       children: [
                                         Container(
                                           padding: const EdgeInsets.all(20),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFF454545),
-                                            borderRadius: BorderRadius.circular(20),
+                                          decoration: const BoxDecoration(
+                                              
+                                            color: Color(0xFF454545),
+                                            borderRadius: BorderRadius.only(topRight: Radius.circular(20),topLeft: Radius.circular(20)),
                                           ),
                                           child: Row(
                                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                             children: [
-                                              Text(
-                                                widget.newResumeMdoel.languages[index].language ?? '',
-                                                style: const TextStyle(color: Colors.white),
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(left: 10, top: 10),
-                                                child: Container(
-                                                  width: 30,
-                                                  height: 30,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.black,
-                                                    border: Border.all(color: Colors.white60),
-                                                    borderRadius: BorderRadius.circular(5),
-                                                  ),
-                                                  child: GestureDetector(
-                                                    onLongPress: () {
-                                                      // Handle long press
-                                                    },
-                                                    child: IconButton(
-                                                      icon: const Icon(
-                                                        Icons.more_vert,
-                                                        color: Colors.white,
-                                                        size: 12,
-                                                      ),
-                                                      onPressed: () {
-                                                        showModalBottomSheet(
-                                                          context: context,
-                                                          builder: (BuildContext context) {
-                                                            return Container(
-                                                              decoration: const BoxDecoration(
-                                                                borderRadius: BorderRadius.only(
-                                                                  topRight: Radius.circular(20),
-                                                                  topLeft: Radius.circular(20),
-                                                                ),
-                                                                color: Color(0xFF454545),
-                                                              ),
-                                                              width: double.infinity,
-                                                              child: FractionallySizedBox(
-                                                                child: Container(
-                                                                  decoration: BoxDecoration(
-                                                                    color: const Color(0xFF454545),
-                                                                    borderRadius: BorderRadius.circular(20),
-                                                                  ),
-                                                                  child: Column(
-                                                                    mainAxisSize: MainAxisSize.min,
-                                                                    children: [
-                                                                      TextButton(
-                                                                        onPressed: () {
-                                                                          setState(() {
-                                                                            rename_lang(index);
-                                                                          });
-                                                                        },
-                                                                        style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                                                                        child: const ListTile(
-                                                                          leading: Icon(Icons.edit, color: Colors.white),
-                                                                          title: Text(
-                                                                            'Edit',
-                                                                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      const Divider(height: 1, color: Colors.white24),
-                                                                      TextButton(
-                                                                        onPressed: () {
-                                                                          setState(() {
-                                                                            edit_lang(index);
-                                                                          });
+                                              Container(constraints: const BoxConstraints(maxWidth: 250),child: Text(
+                                                  widget.newResumeMdoel.languages[index].language ?? '',
+                                                  style: const TextStyle(color: Colors.white),
+                                                  maxLines:1,
+                                                  overflow:TextOverflow.ellipsis
 
-                                                                        },
-                                                                        style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                                                                        child: const ListTile(
-                                                                          leading: Icon(Icons.edit, color: Colors.white),
-                                                                          title: Text(
-                                                                            'Rename',
-                                                                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      const Divider(height: 1, color: Colors.white24),
-                                                                      TextButton(
-                                                                        onPressed: () {
-                                                                          setState(() {
-                                                                            widget.newResumeMdoel.languages.removeAt(index);
-                                                                          });
-                                                                          Navigator.pop(context);
-                                                                        },
-                                                                        style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                                                                        child: const ListTile(
-                                                                          leading: Icon(Icons.delete, color: Colors.red),
-                                                                          title: Text(
-                                                                            'Delete',
-                                                                            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      const Divider(height: 1, color: Colors.white24),
-                                                                      TextButton(
-                                                                        onPressed: () {
-                                                                          Navigator.pop(context);
-                                                                        },
-                                                                        style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                                                                        child: const ListTile(
-                                                                          title: Text(
-                                                                            'Cancel',
-                                                                            style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold),
-                                                                            textAlign: TextAlign.center,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            );
-                                                          },
-                                                        );
-                                                      },
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
+                                              ),),
+
+                                              AdditonalOptions(onPressed: () { languageDot(index); },)
                                             ],
                                           ),
                                         ),
@@ -1539,6 +1385,126 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                     ),
                   ),
 
+                      //references
+                      Scaffold(
+                        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+                        floatingActionButton: Container(
+                          height: 50,
+                          width: 50,
+                          margin: const EdgeInsets.only(bottom: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: Center(
+                            child: IconButton(
+                              onPressed: () {
+                                refrenceSheet();
+                              },
+                              icon: const Icon(
+                                CupertinoIcons.add,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                        body: Container(
+                          color: Colors.black,
+                          child: widget.newResumeMdoel.refrences.isEmpty
+                              ? Container(
+                            alignment: Alignment.center,
+                                color: Colors.black,
+                                height: MediaQuery.of(context).size.height,
+                                width: double.infinity,
+                                key: const ValueKey('empty'),
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        height: 120,
+                                        width: 120,
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue[900],
+                                          borderRadius: BorderRadius.circular(60),
+                                        ),
+                                        child: const Icon(
+                                          CupertinoIcons.doc_circle,
+                                          color: Colors.blue,
+                                          size: 80,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      const Text(
+                                        'No Refrences added',
+                                        style: TextStyle(color: Colors.white, fontSize: 20),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+
+                              : ReorderableListView(
+                            onReorder: (int oldIndex, int newIndex)
+                            {
+                              if (newIndex > oldIndex) {
+                                newIndex -= 1;
+                              }
+                              setState(() {
+                                final item = widget.newResumeMdoel.refrences.removeAt(oldIndex);
+                                widget.newResumeMdoel.refrences.insert(newIndex, item);
+                              });
+                            },
+                            children: [
+                              for (int index = 0; index < widget.newResumeMdoel.refrences.length; index++)
+                                Container(
+                                  key: ValueKey('Refrences_$index'), // Unique key based on index
+                                  color: Colors.black,
+                                  child: Column(
+                                    children: [
+                                      const SizedBox(height: 20),
+                                      Container(
+                                        margin: const EdgeInsets.symmetric(horizontal: 20),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.all(20),
+                                              decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                    color: Colors.white24,
+                                                    width:1,
+                                                  ),
+                                                color: const Color(0xFF454545),
+                                                borderRadius: BorderRadius.circular(20),
+                                              ),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Container(constraints: const BoxConstraints(maxWidth: 250),child: Text(
+                                                      widget.newResumeMdoel.refrences[index].name ?? '',
+                                                      style: const TextStyle(color: Colors.white),
+                                                      maxLines:1,
+                                                      overflow:TextOverflow.ellipsis
+
+                                                  ),),
+
+
+                                                  AdditonalOptions(onPressed: () { refrenceDot(index); },)
+                                                ],
+                                              ),
+                                            ),
+
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+
                       ///template
                       Scaffold(
                         body: Container(
@@ -1554,57 +1520,103 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                             {
                               return GestureDetector(
                                  onTap:  (){
-                                   handleTap(index);
+
+                                   if (widget.newResumeMdoel.intro!.firstName.isEmpty ||
+                                       widget.newResumeMdoel.intro!.lastName.isEmpty ||
+                                       widget.newResumeMdoel.intro!.summary.isEmpty
+                                   ) {
+
+                                     _handleTabChange(0);
+                                     _tabController.animateTo(0);
+                                   }
+
+
+                                   else if(widget.newResumeMdoel.contact!.email.isEmpty||widget.newResumeMdoel.contact!.phoneNumber.isEmpty||widget.newResumeMdoel.contact!.website.isEmpty||widget.newResumeMdoel.contact!.address.isEmpty)
+                                     {
+                                       _handleTabChange(1);
+                                       _tabController.animateTo(1);
+
+                                     }
+                                   else if(widget.newResumeMdoel.skills.isEmpty)
+                                   {
+
+                                     _handleTabChange(5);
+                                     _tabController.animateTo(5);
+                                     print('skills');
+
+                                   }
+                                   else if(widget.newResumeMdoel.languages.isEmpty)
+                                   {
+
+                                     _handleTabChange(6);
+                                     _tabController.animateTo(6);
+                                   }
+                                   else
+                                   {
+
+                                     handleTap(index, context);
+                                   }
+
+
                                  },
                                 child: Column(
                                   children: [
                                     Expanded(
                                       child: Stack(
-                                          children:
-                                          [
-                                            Container(
-
-                                            margin: const EdgeInsets.only(top: 20),
-                                            width: 150,
+                                        children: [
+                                          Container(
+                                            margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.02),
+                                            width: MediaQuery.of(context).size.width * 0.4,
                                             decoration: BoxDecoration(
                                               color: Colors.white,
                                               borderRadius: BorderRadius.circular(10),
                                               image: DecorationImage(
-                                                  image: AssetImage(photo[index]['image']??' ',),
-                                                  fit:BoxFit.fitHeight
+                                                image: AssetImage(photo[index]['image'] ?? ' '),
+                                                fit: BoxFit.fitHeight,
                                               ),
                                             ),
                                           ),
-                                            Positioned(
-                                              top: 170,
-                                              width: 150,
+                                          Positioned.fill(
+                                            child: Align(
+                                              alignment: Alignment.bottomCenter,
+                                              //shade
                                               child: Container(
-                                                padding: const EdgeInsets.only(bottom: 10),
+                                                padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.height * 0.01),
+                                                width: MediaQuery.of(context).size.width * 0.4,
                                                 decoration: const BoxDecoration(
                                                   gradient: LinearGradient(
                                                     begin: Alignment.bottomCenter,
                                                     end: Alignment.topCenter,
-                                                    colors: [Colors.black, Colors.transparent],
-                                                    stops: [0.0, 1.0],
+                                                    colors: [Colors.black87, Colors.transparent],
+                                                    stops: [0.0, 0.2],
                                                   ),
                                                 ),
                                                 child: Column(
-                                                  children:
-                                                  [
-                                                    Row(mainAxisAlignment: MainAxisAlignment.spaceAround,children:
-                                                    [
-                                                      Text(photo[index]['title']??'',style: const TextStyle(color: Colors.white),),
-                                                      const Icon(CupertinoIcons.profile_circled,color: Colors.orange,size: 15,),
-                                                    ],
+                                                  mainAxisAlignment: MainAxisAlignment.end,
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                      children: [
+                                                        Text(
+                                                          photo[index]['title'] ?? '',
+                                                          style: const TextStyle(color: Colors.white,fontWeight: FontWeight.w400,fontSize: 15),
+                                                        ),
+                                                        const Icon(
+                                                          CupertinoIcons.profile_circled,
+                                                          color: Colors.orange,
+                                                          size: 15,
+                                                        ),
+                                                      ],
                                                     ),
-
                                                   ],
                                                 ),
                                               ),
-                                            )
+                                            ),
+                                          ),
+                                        ],
+                                      )
 
-                                          ]
-                                      ),
+
                                     )
                                   ],
                                 ),
@@ -1627,29 +1639,77 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
       ),
     );
   }
+  void handleTap(int index, BuildContext context) {
+    if (widget.newResumeMdoel == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Resume model is null!')),
+      );
+      return;
+    }
 
-  void handleTap(int index) {
-    if (index.isEven) {
-      createPdf_B_W(widget.newResumeMdoel);
-    } else {
-      createPdf_blue(widget.newResumeMdoel);
+    // Create a key for the dialog
+    final GlobalKey<State> dialogKey = GlobalKey<State>();
+
+    // Show the loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Container(
+          key: dialogKey,
+
+        color: Colors.black.withOpacity(0.1),
+          child: const Center(
+            child: CircularProgressIndicator(color: Colors.white,),
+          ),
+        );
+      },
+    );
+
+    // Generate the PDF
+    Future<void> generatePdf() async {
+      try {
+        await (index.isEven
+            ? createPdf_B_W(widget.newResumeMdoel, 'preview', context)
+            : createPdf_blue(widget.newResumeMdoel,'preview', context));
+      } catch (e)
+      {
+        print('Error generating PDF: $e');
+      }
+    }
+
+    // Start PDF generation
+    generatePdf();
+  }
+
+
+  Future _pickImageFromGallery() async {
+    final returnedImage = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (returnedImage != null) {
+      final imageBytes = await returnedImage.readAsBytes(); // Convert to Uint8List
+
+      setState(() {
+        final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+        resumeViewModel.setProfileImage(imageBytes, widget.index); // Pass Uint8List
+        print('$widget.index');
+        resumeViewModel.updateFullness(widget.newResumeMdoel);
+      });
+      Navigator.pop(context);
     }
   }
+  Future _pickImageFromCamera() async {
+    final returnedImage = await ImagePicker().pickImage(source: ImageSource.camera);
+    if (returnedImage != null) {
+      final imageBytes = await returnedImage.readAsBytes();
 
-  Future _pickImageFromGallery() async{
-    final returnedImage= await ImagePicker().pickImage(source: ImageSource.gallery);
-    setState((){
+      setState(() {
+        final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
 
-      _select=File(returnedImage!.path);
-      widget.newResumeMdoel.profile_image=_select;
-    });
-  }
-  Future _pickImageFromCamera() async{
-    final returnedImage= await ImagePicker().pickImage(source: ImageSource.camera);
-    setState((){
-      _select=File(returnedImage!.path);
-      widget.newResumeMdoel.profile_image=_select;
-    });
+        resumeViewModel.setProfileImage(imageBytes, widget.index); // Pass Uint8List
+        resumeViewModel.updateFullness(widget.newResumeMdoel);
+      });
+    }
+    Navigator.pop(context);
   }
   Future imageSheet()
   {
@@ -1665,9 +1725,20 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextButton(onPressed: (){_pickImageFromGallery();},style: TextButton.styleFrom(padding: EdgeInsets.zero,) ,child: const ListTile(leading: Icon(FontAwesomeIcons.image,color: Colors.white,),title: Text('Gallery',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),),),
+                  TextButton(onPressed: ()
+                  {
+                    _pickImageFromGallery();
+
+                  }
+                  ,style: TextButton.styleFrom(padding: EdgeInsets.zero,) ,child: const ListTile(leading: Icon(FontAwesomeIcons.image,color: Colors.white,),title: Text('Gallery',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),),),
+
                   const Divider(height: 1,color: Colors.white24,),
-                  TextButton(onPressed: (){_pickImageFromCamera();}, style: TextButton.styleFrom(padding: EdgeInsets.zero,),child: const ListTile(leading: Icon(CupertinoIcons.camera,color: Colors.white,),title: Text('Camera',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),),),
+
+                  TextButton(onPressed: (){
+                    _pickImageFromCamera();
+                  },
+                    style: TextButton.styleFrom(padding: EdgeInsets.zero,),
+                    child: const ListTile(leading: Icon(CupertinoIcons.camera,color: Colors.white,),title: Text('Camera',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),),),
                 ],
               ),
             ),
@@ -1677,9 +1748,14 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
     );
   }
 
-  //work
-  Future EducationSheet_edit(index)
-  {
+  Future educationSheetEdit(int index) {
+    final formKey = GlobalKey<FormState>();
+    final textControllerSchoolTitle = TextEditingController(text: widget.newResumeMdoel.education[index].schoolTitle);
+    final textControllerMajor = TextEditingController(text: widget.newResumeMdoel.education[index].major);
+    final textControllerEduFrom = TextEditingController(text: widget.newResumeMdoel.education[index].from);
+    final textControllerEduTo = TextEditingController(text: widget.newResumeMdoel.education[index].to);
+
+    bool Cdate = false;
 
     return showModalBottomSheet(
       context: context,
@@ -1687,188 +1763,159 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return FractionallySizedBox(
-              child: Padding(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                ),
-                child: Container(
-                  padding: const EdgeInsets.only(bottom: 40),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF454545),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                    ),
+            return Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Color(0xFF454545),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 20),
-                      Container(
-                        alignment: Alignment.topLeft,
-                        margin: const EdgeInsets.only(left: 20, right: 20, top: 10),
-                        child: Text(
-                          'Which School did you attend',
-                          style: TextStyle(color: text, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Theme(
-                        data: ThemeData.dark(),
-                        child: Container(
-                          margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 20),
-                          height: 50,
-                          width: double.infinity,
-                          child: TextFormField(
-                            controller: textControllerSchoolTitle,
-                            decoration: const InputDecoration(
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                              border: OutlineInputBorder(),
-                            ),
-                            cursorColor: Colors.white,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        alignment: Alignment.topLeft,
-                        margin: const EdgeInsets.only(left: 20, right: 20, top: 10),
-                        child: Text(
-                          'Major',
-                          style: TextStyle(color: text, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Theme(
-                        data: ThemeData.dark(),
-                        child: Container(
-                          margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 20),
-                          height: 50,
-                          width: double.infinity,
-                          child: TextFormField(
-                            controller: textControllerMajor,
-                            decoration: const InputDecoration(
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                              border: OutlineInputBorder(),
-                            ),
-                            cursorColor: Colors.white,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        alignment: Alignment.topLeft,
-                        margin: const EdgeInsets.only(left: 20, right: 20, top: 10),
-                        child: Text(
-                          'From',
-                          style: TextStyle(color: text, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Theme(
-                              data: ThemeData.dark(),
-                              child: Container(
-                                margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 20),
-                                height: 50,
-                                width: (double.infinity / 2),
-                                child: TextFormField(
-                                  keyboardType: TextInputType.datetime,
-                                  controller: textControllerEduFrom,
-                                  decoration: const InputDecoration(
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(color: Colors.white),
-                                    ),
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  cursorColor: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Flexible(
-                            child: Theme(
-                              data: ThemeData.dark(),
-                              child: Container(
-                                margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 20),
-                                height: 50,
-                                width: (double.infinity / 2),
-                                child: TextFormField(
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(height: 20),
 
-                                  ],
-                                  enabled: !Cdate,
-                                  keyboardType: TextInputType.datetime,
-                                  controller: textControllerEduTo,
-                                  decoration: const InputDecoration(
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(color: Colors.white),
-                                    ),
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  cursorColor: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.only(left: 20, right: 10),
-                            child: const Text(
-                              'Present',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                          FlutterSwitch(
-                            width: 50,
-                            activeIcon: const Icon(CupertinoIcons.check_mark),
-                            value: Cdate,
-                            activeColor: Colors.blue,
-                            showOnOff: false,
-                            onToggle: (val) {
-                              setState(() {
-                                Cdate = val;
-                              });
-                            },
-                          ),
-
-
-                        ],
-                      ),
-                      Container(
-                        margin: const EdgeInsets.all(20),
-                        width: double.infinity,
-                        decoration: BoxDecoration(color: Colors.blue,borderRadius: BorderRadius.circular(10)),
-                        child: TextButton(
-                          onPressed: () {
-                            setState(() {
-                              if(Cdate)
-                                {
-                              widget.newResumeMdoel.education[index].schoolTitle=textControllerSchoolTitle.text;
-                              widget.newResumeMdoel.education[index].major=textControllerMajor.text;
-                              widget.newResumeMdoel.education[index].to='PRESENT';
-                              widget.newResumeMdoel.education[index].from=textControllerEduFrom.text;}
-
-                              else
-                                {
-                                  widget.newResumeMdoel.education[index].schoolTitle=textControllerSchoolTitle.text;
-                                  widget.newResumeMdoel.education[index].major=textControllerMajor.text;
-                                  widget.newResumeMdoel.education[index].to=textControllerEduTo.text;
-                                  widget.newResumeMdoel.education[index].from=textControllerEduFrom.text;
-                                }
-                            });
-                            Navigator.pop(context);
+                        CustomTextFieldValidate(
+                          labelText: 'Which School did you attend',
+                          controller: textControllerSchoolTitle,
+                          hintText: 'School Name',
+                          onChanged: (String value) {},
+                          keyboardType: TextInputType.text,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'School cannot be empty';
+                            }
+                            return null;
                           },
-                          child: const Text('Save', style: TextStyle(color: Colors.white)),
                         ),
-                      ),
-                    ],
+
+                        const SizedBox(height: 20),
+
+                        CustomTextFieldValidate(
+                          labelText: 'Major',
+                          controller: textControllerMajor,
+                          hintText: 'Major',
+                          onChanged: (String value) {},
+                          keyboardType: TextInputType.text,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Major cannot be empty';
+                            }
+                            return null;
+                          },
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        Row(
+                          children: [
+                            Expanded(
+                              child: CustomTextFieldValidate(
+                                labelText: 'From',
+                                inputFormatter: [LengthLimitingTextInputFormatter(4)],
+                                controller: textControllerEduFrom,
+                                hintText: '2012',
+                                onChanged: (String value) {},
+                                keyboardType: TextInputType.datetime,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'From cannot be empty';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+
+                            const SizedBox(width: 10),
+
+                            Expanded(
+                              child: CustomTextFieldValidate(
+                                enable:  !Cdate,
+                                labelText: 'To',
+                                controller: textControllerEduTo,
+                                inputFormatter: [LengthLimitingTextInputFormatter(4)],
+                                hintText: '2016',
+                                onChanged: (String value) {},
+                                keyboardType: TextInputType.datetime,
+                                validator: (value) {
+                                  if (!Cdate && (value == null || value.isEmpty)) {
+                                    return 'To cannot be empty';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        Row(
+                          children: [
+                            Text('Present', style: TextStyle(color: Colors.white)),
+                            const SizedBox(width: 10),
+                            FlutterSwitch(
+                              width: 50,
+                              activeIcon: const Icon(CupertinoIcons.check_mark),
+                              value: Cdate,
+                              activeColor: Colors.blue,
+                              showOnOff: false,
+                              onToggle: (val) {
+                                setState(() {
+                                  Cdate = val;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.circular(10)),
+                          child: TextButton(
+                            onPressed: () {
+                              print('her');
+                              if (formKey.currentState?.validate() ?? false) {
+                                print('jer');
+                                if (Cdate) {
+                                  final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                                  resumeViewModel.editEducation(widget.index, index, Education(
+                                      schoolTitle: textControllerSchoolTitle.text,
+                                      major: textControllerMajor.text,
+                                      from: textControllerEduFrom.text,
+                                      to: 'PRESENT'));
+                                  resumeViewModel.updateFullness(widget.newResumeMdoel);
+                                } else {
+                                  final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                                  resumeViewModel.editEducation(widget.index, index, Education(
+                                      schoolTitle: textControllerSchoolTitle.text,
+                                      major: textControllerMajor.text,
+                                      from: textControllerEduFrom.text,
+                                      to: textControllerEduTo.text));
+                                  resumeViewModel.updateFullness(widget.newResumeMdoel);
+                                }
+
+                                textControllerSchoolTitle.clear();
+                                textControllerMajor.clear();
+                                textControllerEduFrom.clear();
+                                textControllerEduTo.clear();
+                                Navigator.pop(context);
+                              }
+                            },
+                            child: const Text('Save', style: TextStyle(color: Colors.white)),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -1906,7 +1953,7 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                     onPressed: ()
                     {
                       setState(() {
-                        EducationSheet_edit(index);
+                        educationSheetEdit(index);
                       });
                     },
                     style: TextButton.styleFrom(padding: EdgeInsets.zero),
@@ -1920,8 +1967,11 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                   ),
                   const Divider(height: 1,color: Colors.white24,),
                   TextButton(
-                    onPressed: () {setState(() {
-                      widget.newResumeMdoel.education.removeAt(index);
+                    onPressed: () {setState(()
+                    {
+                      final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                      resumeViewModel.deleteEducation(widget.index, index);
+                      resumeViewModel.updateFullness(widget.newResumeMdoel);
 
                     });
                     Navigator.pop(context);
@@ -1935,20 +1985,7 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                       ),
                     ),
                   ),
-                  const Divider(height: 1,color: Colors.white24,),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                    child: const ListTile(
-                      title: Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
+
                 ],
               ),
             ),
@@ -1957,9 +1994,13 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
       },
     );
   }
-
   Future EducationSheet() {
-    final _formKey = GlobalKey<FormState>();
+    final formKey = GlobalKey<FormState>();
+    Cdate=false;
+    textControllerSchoolTitle.clear();
+    textControllerMajor.clear();
+    textControllerEduFrom.clear();
+    textControllerEduTo.clear();
 
     return showModalBottomSheet(
       context: context,
@@ -1973,7 +2014,6 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                   bottom: MediaQuery.of(context).viewInsets.bottom,
                 ),
                 child: Container(
-                  padding: const EdgeInsets.only(bottom: 40),
                   decoration: const BoxDecoration(
                     color: Color(0xFF454545),
                     borderRadius: BorderRadius.only(
@@ -1981,944 +2021,154 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                       topRight: Radius.circular(20),
                     ),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 20),
-                      Container(
-                        alignment: Alignment.topLeft,
-                        margin: const EdgeInsets.only(left: 20, right: 20, top: 10),
-                        child: Text(
-                          'Which School did you attend',
-                          style: TextStyle(color: text, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Theme(
-                        data: ThemeData.dark(),
-                        child: Container(
-                          margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 20),
-                          height: 50,
-                          width: double.infinity,
-                          child: TextFormField(
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'School cannot be empty';
-                              }
-                              return null;
-                            },
-                            controller: textControllerSchoolTitle,
-                            decoration: const InputDecoration(
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                              border: OutlineInputBorder(),
-                            ),
-                            cursorColor: Colors.white,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        alignment: Alignment.topLeft,
-                        margin: const EdgeInsets.only(left: 20, right: 20, top: 10),
-                        child: Text(
-                          'Major',
-                          style: TextStyle(color: text, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Theme(
-                        data: ThemeData.dark(),
-                        child: Container(
-                          margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 20),
-                          height: 50,
-                          width: double.infinity,
-                          child: TextFormField(
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Major cannot be empty';
-                              }
-                              return null;
-                            },
-                            controller: textControllerMajor,
-                            decoration: const InputDecoration(
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                              border: OutlineInputBorder(),
-                            ),
-                            cursorColor: Colors.white,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        alignment: Alignment.topLeft,
-                        margin: const EdgeInsets.only(left: 20, right: 20, top: 10),
-                        child: Text(
-                          'From',
-                          style: TextStyle(color: text, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Theme(
-                              data: ThemeData.dark(),
-                              child: Container(
-                                margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 20),
-                                height: 50,
-                                width: (double.infinity / 2),
-                                child: TextFormField(
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'From cannot be empty';
-                                    }
-                                    return null;
-                                  },
-                                  keyboardType: TextInputType.datetime,
-                                  controller: textControllerEduFrom,
-                                  decoration: const InputDecoration(
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(color: Colors.white),
-                                    ),
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  cursorColor: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Flexible(
-                            child: Theme(
-                              data: ThemeData.dark(),
-                              child: Container(
-                                margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 20),
-                                height: 50,
-                                width: (double.infinity / 2),
-                                child: TextFormField(
-                                enabled: !Cdate,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'To cannot be empty';
-                                    }
-                                    return null;
-                                  },
-                                  keyboardType: TextInputType.datetime,
-                                  controller: textControllerEduTo,
-                                  decoration: const InputDecoration(
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(color: Colors.white),
-                                    ),
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  cursorColor: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.only(left: 20, right: 10),
-                            child: const Text(
-                              'Present',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                          FlutterSwitch(
-                            width: 50,
-                            activeIcon: const Icon(CupertinoIcons.check_mark),
-                            value: Cdate,
-                            activeColor: Colors.blue,
-                            showOnOff: false,
-                            onToggle: (val)
-                            {
-                              setState(() {
-                                Cdate = val;
-                              });
-                            },
-                          ),
-                          const SizedBox(width: 150),
-
-                        ],
-                      ),
-                      const SizedBox(height: 30,),
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        width: double.infinity,
-                        decoration: BoxDecoration(color: Colors.blue,borderRadius: BorderRadius.circular(10)),
-                        child: TextButton(
-                          onPressed: () {
-                            if (_formKey.currentState?.validate() ?? false) {
-                              setState(() {
-                                if (Cdate)
-                                  widget.newResumeMdoel.education.add(Education(
-                                      schoolTitle: textControllerSchoolTitle
-                                          .text,
-                                      major: textControllerMajor.text,
-                                      from: textControllerEduFrom.text,
-                                      to: 'PRESENT'));
-                                else
-                                  widget.newResumeMdoel.education.add(Education(
-                                      schoolTitle: textControllerSchoolTitle
-                                          .text,
-                                      major: textControllerMajor.text,
-                                      from: textControllerEduFrom.text,
-                                      to: textControllerEduTo.text));
-
-                                update();
-                              });
-                            }
-                            textControllerSchoolTitle.clear();
-                            textControllerMajor.clear();
-                            textControllerEduFrom.clear();
-                            textControllerEduTo.clear();
-                            update();
-                            Navigator.pop(context);
-                          },
-                          child: const Text('Save', style: TextStyle(color: Colors.white)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-
-  Future SkillSheet() {
-    final textControllerSkillName = TextEditingController();
-    final _formKey = GlobalKey<FormState>();
-
-    return showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        return FractionallySizedBox(
-          child: Padding(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-            child: Container(
-              padding: const EdgeInsets.only(bottom: 20),
-              decoration: const BoxDecoration(
-                color: Color(0xFF454545),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
-              child: SingleChildScrollView(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 20),
-                      Container(
-                        alignment: Alignment.topLeft,
-                        margin: const EdgeInsets.only(left: 20, right: 20, top: 10),
-                        child: const Text(
-                          'Skill',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Theme(
-                        data: ThemeData.dark(),
-                        child: Container(
-                          margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 20),
-                          height: 50,
-                          width: double.infinity,
-                          child: TextFormField(
-                            controller: textControllerSkillName,
-                            decoration: const InputDecoration(
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                              border: OutlineInputBorder(),
-                            ),
-                            cursorColor: Colors.white,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'This field cannot be empty';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: TextButton(
-                          onPressed: () {
-                            if (_formKey.currentState?.validate() ?? false) {
-                              setState(() {
-                                widget.newResumeMdoel.skills.add(
-                                  Skill(skillName: textControllerSkillName.text),
-                                );
-                              });
-                              textControllerSkillName.clear();
-                              Navigator.pop(context);
-                            }
-                          },
-                          child: const Text(
-                            'Save',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-
-  Future lanuageSheet() {
-    final textControllerLanguage = TextEditingController();
-    final textControllerLevel = TextEditingController();
-    final _formKey = GlobalKey<FormState>();
-
-    return showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        return FractionallySizedBox(
-          child: Padding(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-            child: Container(
-              padding: const EdgeInsets.only(bottom: 20),
-              decoration: const BoxDecoration(
-                color: Color(0xFF454545),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
-              child: SingleChildScrollView(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 20),
-                      Container(
-                        alignment: Alignment.topLeft,
-                        margin: const EdgeInsets.only(left: 20, right: 20, top: 10),
-                        child: const Text(
-                          'Language',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Theme(
-                        data: ThemeData.dark(),
-                        child: Container(
-                          margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 20),
-                          height: 50,
-                          width: double.infinity,
-                          child: TextFormField(
-                            controller: textControllerLanguage,
-                            decoration: const InputDecoration(
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                              border: OutlineInputBorder(),
-                            ),
-                            cursorColor: Colors.white,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Language field cannot be empty';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ),
-                      Container(
-                        alignment: Alignment.topLeft,
-                        margin: const EdgeInsets.only(left: 20, right: 20, top: 10),
-                        child: const Text(
-                          'Level (In percentage)',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Theme(
-                        data: ThemeData.dark(),
-                        child: Container(
-                          margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 20),
-                          height: 50,
-                          width: double.infinity,
-                          child: TextFormField(
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(3),
-                            ],
-                            keyboardType: TextInputType.number,
-                            controller: textControllerLevel,
-                            decoration: const InputDecoration(
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                              border: OutlineInputBorder(),
-                            ),
-                            cursorColor: Colors.white,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Level field cannot be empty';
-                              }
-                              final int? level = int.tryParse(value);
-                              if (level == null || level < 0 || level > 100) {
-                                return 'Please enter a value between 0 and 100';
-                              }
-                              return null;
-                            },
-                            onChanged: (value) {
-                              if (value.isNotEmpty) {
-                                if (int.parse(value) >= 100) {
-                                  textControllerLevel.text = "100";
-                                }
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: TextButton(
-                          onPressed: () {
-                            setState(() {
-
-                            });
-                            if (_formKey.currentState?.validate() ?? false) {
-                              setState(() {
-                                widget.newResumeMdoel.languages.add(
-                                  Language(
-                                    language: textControllerLanguage.text,
-                                    level: textControllerLevel.text,
-                                  ),
-                                );
-                              });
-                              textControllerLanguage.clear();
-                              textControllerLevel.clear();
-                              Navigator.pop(context);
-                            }
-                          },
-                          child: const Text(
-                            'Save',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-
-  Future certificationSheet() {
-    final _formKey = GlobalKey<FormState>();
-
-    return showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return FractionallySizedBox(
-          child: Padding(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-            child: Container(
-              padding: const EdgeInsets.only(bottom: 20),
-              decoration: const BoxDecoration(
-                color: Color(0xFF454545),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
-              child: SingleChildScrollView(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 20),
-                      Container(
-                        alignment: Alignment.topLeft,
-                        margin: const EdgeInsets.only(left: 20, right: 20, top: 10),
-                        child: Text(
-                          'Certification',
-                          style: TextStyle(color: text, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Theme(
-                        data: ThemeData.dark(),
-                        child: Container(
-                          margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 20),
-                          height: 50,
-                          width: double.infinity,
-                          child: TextFormField(
-                            controller: textControllerCertificationTitle,
-                            decoration: const InputDecoration(
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                              border: OutlineInputBorder(),
-                            ),
-                            cursorColor: Colors.white,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'This field cannot be empty';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: TextButton(
-                          onPressed: () {
-                            if (_formKey.currentState?.validate() ?? false) {
-                              setState(() {
-                                widget.newResumeMdoel.certifications.add(
-                                  Certification(certificationName: textControllerCertificationTitle.text),
-                                );
-                                update();
-                              });
-                              textControllerCertificationTitle.clear();
-                              update();
-                              Navigator.pop(context);
-                            }
-                          },
-                          child: const Text('Save', style: TextStyle(color: Colors.white)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-
-  Future certification_edit(index) {
-    final textControllerCertificationName = TextEditingController(
-      text: widget.newResumeMdoel.certifications[index].certificationName,
-    );
-    final _formKey = GlobalKey<FormState>();
-
-    return showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        return Container(
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.only(
-              topRight: Radius.circular(20),
-              topLeft: Radius.circular(20),
-            ),
-            color: Color(0xFF454545),
-          ),
-          width: double.infinity,
-          child: FractionallySizedBox(
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF454545),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Padding(
-                padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.all(20),
-                        child: Theme(
-                          data: ThemeData.dark(),
-                          child: TextFormField(
-                            controller: textControllerCertificationName,
-                            decoration: const InputDecoration(
-                              labelText: 'Certification Name',
-                              labelStyle: TextStyle(color: Colors.white),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                              border: OutlineInputBorder(),
-                            ),
-                            cursorColor: Colors.white,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Certification name cannot be empty';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: TextButton(
-                          onPressed: () {
-                            if (_formKey.currentState?.validate() ?? false) {
-                              setState(() {
-                                widget.newResumeMdoel.certifications[index] = Certification(
-                                  certificationName: textControllerCertificationName.text,
-                                );
-                              });
-                              Navigator.pop(context);
-                            }
-                          },
-                          child: const Text(
-                            'Save',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                      const Divider(height: 1, color: Colors.white24),
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            widget.newResumeMdoel.certifications.removeAt(index);
-                          });
-                          Navigator.pop(context);
-                        },
-                        style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                        child: const ListTile(
-                          leading: Icon(Icons.delete, color: Colors.red),
-                          title: Text(
-                            'Delete',
-                            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                      const Divider(height: 1, color: Colors.white24),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                        child: const ListTile(
-                          title: Text(
-                            'Cancel',
-                            style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future experienceSheet() {
-    final textControllerCompany = TextEditingController();
-    final textControllerPosition = TextEditingController();
-    final textControllerLocation = TextEditingController();
-    final textControllerEFrom = TextEditingController();
-    final textControllerETo = TextEditingController();
-    final textControllerDescription = TextEditingController();
-    final _formKey = GlobalKey<FormState>();
-
-    return showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return FractionallySizedBox(
-              child: Padding(
-                padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-                child: SingleChildScrollView(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF454545),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        topRight: Radius.circular(20),
-                      ),
-                    ),
+                    padding: const EdgeInsets.only(bottom: 40),
+                    margin: const EdgeInsets.only(left: 20, right: 20, top: 10),
+
                     child: Form(
-                      key: _formKey,
+                      key: formKey,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const SizedBox(height: 20),
-                          Container(
-                            alignment: Alignment.topLeft,
-                            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                            child: Text('Company', style: TextStyle(color: text, fontWeight: FontWeight.bold)),
+                          CustomTextFieldValidate(
+                            labelText: 'Which Educational Institute did you attend',
+                            controller: textControllerSchoolTitle, hintText: 'Shnaghai University',
+                            onChanged: (String ) {  },
+
+                            validator: (value) {
+                              if (value == null || value.isEmpty)
+                              {
+                                return 'Educational Institute cannot be empty';
+                              }
+                              return null;
+                            }, keyboardType: TextInputType.text,
                           ),
-                          Theme(
-                            data: ThemeData.dark(),
-                            child: Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                              child: TextFormField(
-                                controller: textControllerCompany,
-                                decoration: const InputDecoration(
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.white),
-                                  ),
-                                  border: OutlineInputBorder(),
-                                ),
-                                cursorColor: Colors.white,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Company cannot be empty';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
+
+                          const SizedBox(height: 20),
+                          CustomTextFieldValidate(
+                            labelText: 'Major',
+                            controller: textControllerMajor, hintText: 'Bachelors of ...',
+                            onChanged: (String ) {  },
+
+                            validator: (value) {
+                              if (value == null || value.isEmpty)
+                              {
+                                return 'Major cannot be empty';
+                              }
+                              return null;
+                            }, keyboardType: TextInputType.text,
                           ),
-                          Container(
-                            alignment: Alignment.topLeft,
-                            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                            child: Text('Position', style: TextStyle(color: text, fontWeight: FontWeight.bold)),
-                          ),
-                          Theme(
-                            data: ThemeData.dark(),
-                            child: Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                              child: TextFormField(
-                                controller: textControllerPosition,
-                                decoration: const InputDecoration(
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.white),
-                                  ),
-                                  border: OutlineInputBorder(),
-                                ),
-                                cursorColor: Colors.white,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Position cannot be empty';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                          ),
-                          Container(
-                            alignment: Alignment.topLeft,
-                            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                            child: Text('Location', style: TextStyle(color: text, fontWeight: FontWeight.bold)),
-                          ),
-                          Theme(
-                            data: ThemeData.dark(),
-                            child: Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                              child: TextFormField(
-                                controller: textControllerLocation,
-                                decoration: const InputDecoration(
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.white),
-                                  ),
-                                  border: OutlineInputBorder(),
-                                ),
-                                cursorColor: Colors.white,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Location cannot be empty';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                          ),
-                          Container(
-                            alignment: Alignment.topLeft,
-                            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                            child: Text('From', style: TextStyle(color: text, fontWeight: FontWeight.bold)),
-                          ),
+
+                          const SizedBox(height: 20),
+
                           Row(
                             children: [
+
                               Flexible(
                                 child: Theme(
                                   data: ThemeData.dark(),
-                                  child: Container(
-                                    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                    child: TextFormField(
-                                      keyboardType: TextInputType.datetime,
-                                      controller: textControllerEFrom,
-                                      decoration: const InputDecoration(
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.white),
-                                        ),
-                                        border: OutlineInputBorder(),
-                                      ),
-                                      cursorColor: Colors.white,
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Start date cannot be empty';
-                                        }
-                                        return null;
-                                      },
-                                    ),
+                                  child: CustomTextFieldValidate(
+                                    labelText: 'From',
+                                    inputFormatter: [LengthLimitingTextInputFormatter(4)],
+                                    controller: textControllerEduFrom,
+                                    hintText: '2012',
+                                    onChanged: (String value) {},
+                                    keyboardType: TextInputType.datetime,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'From cannot be empty';
+                                      }
+                                      return null;
+                                    },
                                   ),
                                 ),
-                              ),
+                              ),const SizedBox(width: 10),
                               Flexible(
                                 child: Theme(
                                   data: ThemeData.dark(),
-                                  child: Container(
-                                    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                    child: TextFormField(
-                                      enabled: !Cdate,
-                                      keyboardType: TextInputType.datetime,
-                                      controller: textControllerETo,
-                                      decoration: const InputDecoration(
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.white),
-                                        ),
-                                        border: OutlineInputBorder(),
-                                      ),
-                                      cursorColor: Colors.white,
-                                      validator: (value) {
-                                        if (!Cdate && (value == null || value.isEmpty)) {
-                                          return 'End date cannot be empty if not present';
-                                        }
-                                        return null;
-                                      },
-                                    ),
+                                  child: CustomTextFieldValidate(
+                                    enable:  !Cdate,
+                                    labelText: 'To',
+                                    controller: textControllerEduTo,
+                                    inputFormatter: [LengthLimitingTextInputFormatter(4)],
+                                    hintText: '2016',
+                                    onChanged: (String value) {},
+                                    keyboardType: TextInputType.datetime,
+                                    validator: (value) {
+                                      if (!Cdate && (value == null || value.isEmpty)) {
+                                        return 'To cannot be empty';
+                                      }
+                                      return null;
+                                    },
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          Container(
-                            alignment: Alignment.topLeft,
-                            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                            child: Text('Description', style: TextStyle(color: text, fontWeight: FontWeight.bold)),
-                          ),
-                          Theme(
-                            data: ThemeData.dark(),
-                            child: Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                              child: TextFormField(
-                                controller: textControllerDescription,
-                                decoration: const InputDecoration(
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.white),
-                                  ),
-                                  border: OutlineInputBorder(),
-                                ),
-                                cursorColor: Colors.white,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Description cannot be empty';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                          ),
+                          const SizedBox(height: 20),
                           Row(
                             children: [
                               Container(
-                                margin: const EdgeInsets.only(left: 20, right: 10),
-                                child: const Text('Present', style: TextStyle(color: Colors.white)),
+                                child: const Text(
+                                  'Present',
+                                  style: TextStyle(color: Colors.white),
+                                ),
                               ),
-                              Stack(
-                                children: [
-                                  FlutterSwitch(
-                                    width: 50,
-                                    activeIcon: const Icon(CupertinoIcons.check_mark),
-                                    value: Cdate,
-                                    activeColor: Colors.blue,
-                                    showOnOff: false,
-                                    onToggle: (val) {
-                                      setState(() {
-                                        Cdate = val;
-                                      });
-                                    },
-                                  ),
-                                ],
+                              const SizedBox(width: 10),
+                              FlutterSwitch(
+                                width: 50,
+                                activeIcon: const Icon(CupertinoIcons.check_mark),
+                                value: Cdate,
+                                activeColor: Colors.blue,
+                                showOnOff: false,
+                                onToggle: (val) {
+                                  setState(() {
+                                    Cdate = val;
+                                  });
+                                },
                               ),
-                              const Spacer(),
+                              const SizedBox(width: 150),
                             ],
                           ),
-                          const SizedBox(height: 30),
+                          const SizedBox(height: 20),
                           Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 20),
+
                             width: double.infinity,
                             decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.circular(10)),
                             child: TextButton(
                               onPressed: () {
-                                if (_formKey.currentState?.validate() ?? false)
-                                {
-                                  setState(() {
-                                    if (Cdate) {
-                                      widget.newResumeMdoel.experience.add(Experience(
-                                        company: textControllerCompany.text,
-                                        position: textControllerPosition.text,
-                                        location: textControllerLocation.text,
-                                        from: textControllerEFrom.text,
-                                        to: 'PRESENT',
-                                        description: textControllerDescription.text,
-                                      ));
-                                    } else {
-                                      widget.newResumeMdoel.experience.add(Experience(
-                                        company: textControllerCompany.text,
-                                        position: textControllerPosition.text,
-                                        location: textControllerLocation.text,
-                                        from: textControllerEFrom.text,
-                                        to: textControllerETo.text,
-                                        description: textControllerDescription.text,
-                                      ));
-                                    }
-                                    Navigator.pop(context);
-                                    update();
-                                  });
-                                  textControllerCompany.clear();
-                                  textControllerPosition.clear();
-                                  textControllerEFrom.clear();
-                                  textControllerETo.clear();
-                                  textControllerDescription.clear();
+                                if (formKey.currentState?.validate() ?? false) {
+                                  if (Cdate) {
+
+                                    final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                                    resumeViewModel.addEducation(widget.index, Education(
+                                        schoolTitle: textControllerSchoolTitle.text,
+                                        major: textControllerMajor.text,
+                                        from: textControllerEduFrom.text,
+                                        to: 'PRESENT'));
+                                    resumeViewModel.updateFullness(widget.newResumeMdoel);
+                                  }
+                                  else
+                                  {
+                                    final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                                    resumeViewModel.addEducation(widget.index, Education(
+                                        schoolTitle: textControllerSchoolTitle.text,
+                                        major: textControllerMajor.text,
+                                        from: textControllerEduFrom.text,
+                                        to: textControllerEduTo.text));
+                                    resumeViewModel.updateFullness(widget.newResumeMdoel);
+                                  }
+
+                                  // Call update function to refresh the state
                                   update();
+
+                                  textControllerSchoolTitle.clear();
+                                  textControllerMajor.clear();
+                                  textControllerEduFrom.clear();
+                                  textControllerEduTo.clear();
+
+                                  Navigator.pop(context);
                                 }
                               },
                               child: const Text('Save', style: TextStyle(color: Colors.white)),
@@ -2938,6 +2188,249 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
   }
 
 
+
+  Future certification_dot(index) {
+    final textControllerCertificationName = TextEditingController(
+      text: widget.newResumeMdoel.certifications[index].certificationName,
+    );
+    final formKey = GlobalKey<FormState>();
+
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(20),
+              topLeft: Radius.circular(20),
+            ),
+            color: Color(0xFF454545),
+          ),
+          width: double.infinity,
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF454545),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Certification_Edit(index);
+                      },
+                      style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                      child: const ListTile(
+                        leading: Icon(Icons.edit, color: Colors.white),
+                        title: Text(
+                          'Edit',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                    ),
+                    const Divider(height: 1, color: Colors.white24),
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+
+                          final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                          resumeViewModel.deleteCertification(widget.index, index);
+                          resumeViewModel.updateFullness(widget.newResumeMdoel);
+                        });
+                        Navigator.pop(context);
+                      },
+                      style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                      child: const ListTile(
+                        leading: Icon(Icons.delete, color: Colors.red),
+                        title: Text(
+                          'Delete',
+                          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+
+
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future Certification_Edit(int index) {
+    final textControllerCertificationName = TextEditingController(
+      text: widget.newResumeMdoel.certifications[index].certificationName,
+    );
+    final formKey = GlobalKey<FormState>();
+
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.only(bottom: 20,top: 20),
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(20),
+              topLeft: Radius.circular(20),
+            ),
+            color: Color(0xFF454545),
+          ),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+
+                  Container(
+                    margin: const EdgeInsets.all(20),
+                    child: Theme(
+                      data: ThemeData.dark(),
+                      child: CustomTextFieldValidate(
+                        labelText: 'Certification Name',
+                        controller: textControllerCertificationName, hintText: '',
+                        onChanged: (String ) {  },
+
+                        validator: (value) {
+                          if (value == null || value.isEmpty)
+                          {
+                            return 'Certification cannot be empty';
+                          }
+                          return null;
+                        }, keyboardType: TextInputType.text,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: TextButton(
+                      onPressed: () {
+                        if (formKey.currentState?.validate() ?? false) {
+                          setState(() {
+                            widget.newResumeMdoel.certifications[index] = Certification(
+                              certificationName: textControllerCertificationName.text,
+                            );
+                            final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                            resumeViewModel.editCertification(widget.index, index,Certification(
+                              certificationName: textControllerCertificationName.text,
+                            ) );
+                          });
+                          Navigator.pop(context);
+
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: const Text(
+                        'Save',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future certificationSheet() {
+    final formKey = GlobalKey<FormState>();
+
+
+    return showModalBottomSheet(
+      isScrollControlled: true,
+
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFF454545),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Container(
+              margin: const EdgeInsets.only(left: 20, right: 20, top: 10),
+              child: SingleChildScrollView(
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 20),
+                      CustomTextFieldValidate(
+                        labelText: 'Certification Name',
+                        controller: textControllerCertificationTitle, hintText: 'Basics of Python - Udemy',
+                        onChanged: (String ) {  },
+
+                        validator: (value) {
+                          if (value == null || value.isEmpty)
+                          {
+                            return 'Certification cannot be empty';
+                          }
+                          return null;
+                        }, keyboardType: TextInputType.text,
+                      ),
+                      const SizedBox(height: 20),
+                      Container(
+
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: TextButton(
+                          onPressed: () {
+                            if (formKey.currentState?.validate() ?? false) {
+                              setState(() {
+                                final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                                resumeViewModel.addCertification(widget.index, Certification(certificationName: textControllerCertificationTitle.text));
+                                resumeViewModel.updateFullness(widget.newResumeMdoel);
+                                update();
+                              });
+                              textControllerCertificationTitle.clear();
+                              update();
+                              Navigator.pop(context);
+                            }
+                          },
+                          child: const Text('Save', style: TextStyle(color: Colors.white)),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+
+
   void update()
   {
     setState(() {
@@ -2947,6 +2440,14 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
 
   Future experience_edit(index)
   {
+   textControllerCompany=TextEditingController(text: widget.newResumeMdoel.experience[index].company);
+     textControllerPosition=TextEditingController(text: widget.newResumeMdoel.experience[index].position);
+     textControllerLocation=TextEditingController(text: widget.newResumeMdoel.experience[index].location);
+     textControllerEFrom=TextEditingController(text: widget.newResumeMdoel.experience[index].from);
+    textControllerETo=TextEditingController(text: widget.newResumeMdoel.experience[index].to);
+     textControllerDescription=TextEditingController(text: widget.newResumeMdoel.experience[index].description);
+   Cdate=false;
+   final formKey = GlobalKey<FormState>();
 
     return showModalBottomSheet(
       context: context,
@@ -2954,7 +2455,223 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+              child: SingleChildScrollView(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF454545),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Form(
+                      key: formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(height: 20),
+                          CustomTextFieldValidate(
+                            labelText: 'Company',
+                            controller: textControllerCompany,
+                            hintText: 'Global inc',
+                            onChanged: (String) {},
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Company cannot be empty';
+                              }
+                              return null;
+                            },
+                            keyboardType: TextInputType.text,
+                          ),
+                          const SizedBox(height: 20),
+                          CustomTextFieldValidate(
+                            labelText: 'Position',
+                            controller: textControllerPosition,
+                            hintText: 'Manager',
+                            onChanged: (String) {},
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Position cannot be empty';
+                              }
+                              return null;
+                            },
+                            keyboardType: TextInputType.text,
+                          ),
+                          const SizedBox(height: 20),
+                          CustomTextFieldValidate(
+                            labelText: 'Location',
+                            controller: textControllerLocation,  // Correct controller used
+                            hintText: 'Sydney, Australia',
+                            onChanged: (String) {},
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Location cannot be empty';
+                              }
+                              return null;
+                            },
+                            keyboardType: TextInputType.text,
+                          ),
+                          const SizedBox(height: 20),
+
+                          Row(
+                            children: [
+                              Expanded(
+                                child: CustomTextFieldValidate(
+                                  labelText: 'From',
+                                  controller: textControllerEFrom,  // Correct controller used
+                                  hintText: '2012',
+                                  onChanged: (String) {},
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Start date cannot be empty';
+                                    }
+                                    return null;
+                                  },
+                                  keyboardType: TextInputType.datetime,
+                                  inputFormatter: [LengthLimitingTextInputFormatter(4)],
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: CustomTextFieldValidate(
+                                  labelText: 'To',
+                                  controller: textControllerETo,
+                                  hintText: '2018',
+                                  onChanged: (String) {},
+                                  validator: (value) {
+                                    if (!Cdate && (value == null || value.isEmpty)) {
+                                      return 'End date cannot be empty';
+                                    }
+                                    return null;
+                                  },
+                                  keyboardType: TextInputType.datetime,
+                                  inputFormatter: [LengthLimitingTextInputFormatter(4)],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          CustomSummaryFieldNON(
+                            height: 80,
+                            labelText: 'Description',
+                            controller: textControllerDescription,
+                            hintText: 'Type Your letter message',
+                            onChanged: (value) {},
+                            borderColor: Colors.grey,
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              Container(
+
+                                child: const Text('Present', style: TextStyle(color: Colors.white)),
+                              ),
+                              SizedBox(width: 10,),
+                              Stack(
+                                children: [
+                                  FlutterSwitch(
+                                    width: 50,
+                                    activeIcon: const Icon(CupertinoIcons.check_mark),
+                                    value: Cdate,
+                                    activeColor: Colors.blue,
+                                    showOnOff: false,
+                                    onToggle: (val) {
+                                      setState(() {
+                                        Cdate = val;
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                              const Spacer(),
+
+                            ],
+                          ),
+                          const SizedBox(height: 30,),
+                          Container(
+
+                            width: double.infinity,
+                            decoration: BoxDecoration(color: Colors.blue,borderRadius: BorderRadius.circular(10)),
+                            child: TextButton(
+                              onPressed: () {
+                                if (formKey.currentState?.validate() ?? false)
+                                {
+                                  setState(() {
+                                    if (Cdate) {
+                                      final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                                      resumeViewModel.editExperience(widget.index,index, Experience(
+                                        company: textControllerCompany.text,
+                                        position: textControllerPosition.text,
+                                        location: textControllerLocation.text,
+                                        from: textControllerEFrom.text,
+                                        to: 'PRESENT',
+                                        description: textControllerDescription.text,
+                                      ));
+                                    }
+                                    else {
+                                      final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                                      resumeViewModel.editExperience(widget.index,index, Experience(
+                                        company: textControllerCompany.text,
+                                        position: textControllerPosition.text,
+                                        location: textControllerLocation.text,
+                                        from: textControllerEFrom.text,
+                                        to: textControllerEduTo.text,
+                                        description: textControllerDescription.text,
+                                      ));
+                                    }
+                                    update();
+                                    textControllerCompany.clear();
+                                    textControllerDescription.clear();
+                                    textControllerETo.clear();
+                                    textControllerEFrom.clear();
+                                    textControllerPosition.clear();
+                                  });
+                                  update();
+                                  Navigator.pop(context);
+                                }
+
+                              },
+                              child: const Text('Save', style: TextStyle(color: Colors.white)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+
+      },
+    );
+  }
+
+  Future experienceSheet() {
+    final textControllerCompany = TextEditingController();
+    final textControllerPosition = TextEditingController();
+    final textControllerLocation = TextEditingController();
+    final textControllerEFrom = TextEditingController();
+    final textControllerETo = TextEditingController();
+    final textControllerDescription = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    Cdate = false;
+
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,  // Ensure background isn't causing visibility issues
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
             return FractionallySizedBox(
+              heightFactor: 0.85,  // Control the size of the modal sheet
               child: Padding(
                 padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
                 child: SingleChildScrollView(
@@ -2967,161 +2684,112 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                         topRight: Radius.circular(20),
                       ),
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const SizedBox(height: 20),
-                        Container(
-                          alignment: Alignment.topLeft,
-                          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                          child: Text('Company', style: TextStyle(color: text, fontWeight: FontWeight.bold)),
-                        ),
-                        Theme(
-                          data: ThemeData.dark(),
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                            child: TextFormField(
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 20),
+
+                      child: Form(
+                        key: formKey,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(height: 20),
+                            CustomTextFieldValidate(
+                              labelText: 'Company',
                               controller: textControllerCompany,
-                              decoration: const InputDecoration(
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.white),
-                                ),
-                                border: OutlineInputBorder(),
-                              ),
-                              cursorColor: Colors.white,
+                              hintText: 'Global inc',
+                              onChanged: (String) {},
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Company cannot be empty';
+                                }
+                                return null;
+                              },
+                              keyboardType: TextInputType.text,
                             ),
-                          ),
-                        ),
-                        Container(
-                          alignment: Alignment.topLeft,
-                          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                          child: Text('Position', style: TextStyle(color: text, fontWeight: FontWeight.bold)),
-                        ),
-                        Theme(
-                          data: ThemeData.dark(),
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                            child: TextFormField(
-
+                            const SizedBox(height: 20),
+                            CustomTextFieldValidate(
+                              labelText: 'Position',
                               controller: textControllerPosition,
-                              decoration: const InputDecoration(
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.white),
-                                ),
-                                border: OutlineInputBorder(),
-                              ),
-                              cursorColor: Colors.white,
+                              hintText: 'Manager',
+                              onChanged: (String) {},
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Position cannot be empty';
+                                }
+                                return null;
+                              },
+                              keyboardType: TextInputType.text,
                             ),
-                          ),
-                        ),
+                            const SizedBox(height: 20),
+                            CustomTextFieldValidate(
+                              labelText: 'Location',
+                              controller: textControllerLocation,  // Correct controller used
+                              hintText: 'Sydney, Australia',
+                              onChanged: (String) {},
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Location cannot be empty';
+                                }
+                                return null;
+                              },
+                              keyboardType: TextInputType.text,
+                            ),
+                            const SizedBox(height: 20),
 
-                        Container(
-                          alignment: Alignment.topLeft,
-                          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                          child: Text('Location', style: TextStyle(color: text, fontWeight: FontWeight.bold)),
-                        ),
-                        Theme(
-                          data: ThemeData.dark(),
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                            child: TextFormField(
-
-                              controller: textControllerLocation,
-                              decoration: const InputDecoration(
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.white),
-                                ),
-                                border: OutlineInputBorder(),
-                              ),
-                              cursorColor: Colors.white,
-                            ),
-                          ),
-                        ),
-
-
-                        Container(
-                          alignment: Alignment.topLeft,
-                          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                          child: Text('From - To', style: TextStyle(color: text, fontWeight: FontWeight.bold)),
-                        ),
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Theme(
-                                data: ThemeData.dark(),
-                                child: Container(
-                                  margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                  child: TextFormField(
-                                    keyboardType: TextInputType.datetime,
-                                    controller: textControllerEFrom,
-                                    decoration: const InputDecoration(
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(color: Colors.white),
-                                      ),
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    cursorColor: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Flexible(
-                              child: Theme(
-                                data: ThemeData.dark(),
-                                child: Container(
-                                  margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                  child: TextFormField(
-                                    enabled: !Cdate,
-                                    keyboardType: TextInputType.datetime,
-                                    controller: textControllerETo,
-                                    decoration: const InputDecoration(
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(color: Colors.white),
-                                      ),
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    cursorColor: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          alignment: Alignment.topLeft,
-                          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                          child: Text('Description', style: TextStyle(color: text, fontWeight: FontWeight.bold)),
-                        ),
-                        Theme(
-
-                          data: ThemeData.dark(),
-                          child: Container(
-                            height: 150,
-                            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                            child: TextFormField(
-                              keyboardType: TextInputType.multiline,
-                              expands: true,
-                              maxLines: null,
-                              minLines: null,
-                              controller: textControllerDescription,
-                              decoration: const InputDecoration(
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.white),
-                                ),
-                                border: OutlineInputBorder(),
-                              ),
-                              cursorColor: Colors.white,
-                            ),
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Container(
-                              margin: const EdgeInsets.only(left: 20, right: 10),
-                              child: const Text('Present', style: TextStyle(color: Colors.white)),
-                            ),
-                            Stack(
+                            Row(
                               children: [
+                                Expanded(
+                                  child: CustomTextFieldValidate(
+                                    labelText: 'From',
+                                    controller: textControllerEFrom,  // Correct controller used
+                                    hintText: '2012',
+                                    onChanged: (String) {},
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Start date cannot be empty';
+                                      }
+                                      return null;
+                                    },
+                                    keyboardType: TextInputType.datetime,
+                                    inputFormatter: [LengthLimitingTextInputFormatter(4)],
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: CustomTextFieldValidate(
+                                    labelText: 'To',
+                                    controller: textControllerETo,
+                                    hintText: '2018',
+                                    onChanged: (String) {},
+                                    validator: (value) {
+                                      if (!Cdate && (value == null || value.isEmpty)) {
+                                        return 'End date cannot be empty';
+                                      }
+                                      return null;
+                                    },
+                                    keyboardType: TextInputType.datetime,
+                                    inputFormatter: [LengthLimitingTextInputFormatter(4)],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            CustomSummaryFieldNON(
+                              height: 80,
+                              labelText: 'Description',
+                              controller: textControllerDescription,
+                              hintText: 'Type Your letter message',
+                              onChanged: (value) {},
+                              borderColor: Colors.grey,
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              children: [
+                                Container(
+
+                                  child: const Text('Present', style: TextStyle(color: Colors.white)),
+                                ),
+                                SizedBox(width: 10,),
                                 FlutterSwitch(
                                   width: 50,
                                   activeIcon: const Icon(CupertinoIcons.check_mark),
@@ -3134,63 +2802,65 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                                     });
                                   },
                                 ),
+                                const Spacer(),
                               ],
                             ),
-                            const Spacer(),
+                            const SizedBox(height: 30),
+                            Container(
 
+                              width: double.infinity,
+                              decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.circular(10)),
+                              child: TextButton(
+                                  onPressed: () {
+                                    if (formKey.currentState?.validate() ?? false) {
+                                      setState(() {
+                                        if (Cdate) {
+                                          final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                                          resumeViewModel.addExperience(
+                                            widget.index,
+                                            Experience(
+                                              company: textControllerCompany.text,
+                                              position: textControllerPosition.text,
+                                              location: textControllerLocation.text,
+                                              from: textControllerEFrom.text,
+                                              to: 'PRESENT',
+                                              description: textControllerDescription.text,
+                                            ),
+                                          );
+                                          resumeViewModel.updateFullness(widget.newResumeMdoel);
+                                        } else {
+                                          final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                                          resumeViewModel.addExperience(
+                                            widget.index,
+                                            Experience(
+                                              company: textControllerCompany.text,
+                                              position: textControllerPosition.text,
+                                              location: textControllerLocation.text,
+                                              from: textControllerEFrom.text,
+                                              to: textControllerETo.text,
+                                              description: textControllerDescription.text,
+                                            ),
+                                          );
+                                          resumeViewModel.updateFullness(widget.newResumeMdoel);
+                                        }
+                                        Navigator.pop(context);
+                                        update();
+                                      });
+                                      textControllerCompany.clear();
+                                      textControllerPosition.clear();
+                                      textControllerEFrom.clear();
+                                      textControllerETo.clear();
+                                      textControllerDescription.clear();
+                                      update();
+                                    }
+                                  },
+
+                                  child: const Text('Save', style: TextStyle(color: Colors.white)),
+                              ),
+                            ),
                           ],
                         ),
-                        const SizedBox(height: 30,),
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 20),
-                          width: double.infinity,
-                          decoration: BoxDecoration(color: Colors.blue,borderRadius: BorderRadius.circular(10)),
-                          child: TextButton(
-                            onPressed: () {
-
-                              setState(() {
-                                if(Cdate) {
-                                  widget.newResumeMdoel.experience[index]
-                                      .description =
-                                      textControllerDescription.text;
-                                  widget.newResumeMdoel.experience[index]
-                                      .position = textControllerPosition.text;
-                                  widget.newResumeMdoel.experience[index]
-                                      .company = textControllerCompany.text;
-                                  widget.newResumeMdoel.experience[index]
-                                      .location = textControllerLocation.text;
-                                  widget.newResumeMdoel.experience[index].from =
-                                      textControllerEFrom.text;
-                                  widget.newResumeMdoel.experience[index].to =
-                                      'PRESENT';
-                                }
-                                else
-                                  {
-                                    widget.newResumeMdoel.experience[index]
-                                        .description =
-                                        textControllerDescription.text;
-                                    widget.newResumeMdoel.experience[index]
-                                        .position = textControllerPosition.text;
-                                    widget.newResumeMdoel.experience[index]
-                                        .company = textControllerCompany.text;
-                                    widget.newResumeMdoel.experience[index]
-                                        .location = textControllerLocation.text;
-                                    widget.newResumeMdoel.experience[index].from =
-                                        textControllerEFrom.text;
-                                    widget.newResumeMdoel.experience[index].to =
-                                        textControllerETo.text;
-
-                                  }
-                                update();
-
-                              });
-                              update();
-                              Navigator.of(context)..pop()..pop();
-                            },
-                            child: const Text('Save', style: TextStyle(color: Colors.white)),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -3198,10 +2868,10 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
             );
           },
         );
-
       },
     );
   }
+
 
   Future experience_dot(index)
   {
@@ -3246,7 +2916,9 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                   TextButton(
                     onPressed: () {
                       setState(() {
-                        widget.newResumeMdoel.experience.removeAt(index);
+                        final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                        resumeViewModel.deleteExperience(widget.index, index);
+                        resumeViewModel.updateFullness(widget.newResumeMdoel);
                       });
                       Navigator.pop(context);
                     },
@@ -3259,20 +2931,7 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                       ),
                     ),
                   ),
-                  const Divider(height: 1,color: Colors.white24,),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                    child: const ListTile(
-                      title: Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
+
                 ],
               ),
             ),
@@ -3282,69 +2941,230 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
     );
   }
 
-  Future rename_certi(int index) {
-    final textControllerCertificationTitle = TextEditingController(text: widget.newResumeMdoel.certifications[index].certificationName);
-    final _formKey = GlobalKey<FormState>();
+
+
+  Future refrenceSheet() {
+    final textControllerRName = TextEditingController();
+    final textControllerRCompany = TextEditingController();
+    final textControllerRPostition = TextEditingController();
+    final textControllerRPhone = TextEditingController();
+    final textControllerREmail = TextEditingController();
+
+
+    final formKey = GlobalKey<FormState>();
 
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: Container(
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.only(
-                topRight: Radius.circular(20),
-                topLeft: Radius.circular(20),
-              ),
-              color: Color(0xFF454545),
-            ),
-            width: double.infinity,
-            child: FractionallySizedBox(
-              child: Container(
-                padding: const EdgeInsets.all(30),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF454545),
-                  borderRadius: BorderRadius.circular(20),
+        return FractionallySizedBox(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Container(
+              padding: const EdgeInsets.only(bottom: 20),
+              decoration: const BoxDecoration(
+                color: Color(0xFF454545),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
                 ),
+              ),
+              child: SingleChildScrollView(
                 child: Form(
-                  key: _formKey,
-                  child: SingleChildScrollView(
+                  key: formKey,
+                  child: Container(
+                    margin: const EdgeInsets.only(left: 20, right: 20, top: 10),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const SizedBox(height: 5),
-                        const Align(
+                        const SizedBox(height: 20),
+                        //name
+                        Container(
                           alignment: Alignment.topLeft,
-                          child: Text(
-                            'Enter Certification',
-                            style: TextStyle(color: Colors.white),
+
+                          child: const Text(
+                            'Name',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                           ),
                         ),
-                        const SizedBox(height: 5),
+
+                        const SizedBox(height: 10,),
                         Theme(
                           data: ThemeData.dark(),
                           child: TextFormField(
-                            controller: textControllerCertificationTitle,
+
+                            controller: textControllerRName,
                             decoration: const InputDecoration(
-                              labelText: 'Certification Title',
+                              label: Text('Vitalik'),
+                              floatingLabelBehavior: FloatingLabelBehavior.never,
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(color: Colors.white),
                               ),
                               border: OutlineInputBorder(),
                             ),
+                            cursorColor: Colors.white,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Certification title cannot be empty';
+                                return 'Name field cannot be empty';
+                              }
+
+                              return null;
+                            },
+                          ),
+                        ),
+
+                        const SizedBox(height: 20,),
+                        //postition
+                        Container(
+                          alignment: Alignment.topLeft,
+
+                          child: const Text(
+                            'Position',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+
+                        const SizedBox(height: 10,),
+                        Theme(
+                          data: ThemeData.dark(),
+                          child: TextFormField(
+
+
+                            controller: textControllerRPostition,
+                            decoration: const InputDecoration(
+                              label: Text('Manager'),
+                              floatingLabelBehavior: FloatingLabelBehavior.never,
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white),
+                              ),
+                              border: OutlineInputBorder(),
+                            ),
+                            cursorColor: Colors.white,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Position field cannot be empty';
+                              }
+                              return null;
+                            }
+                          ),
+                        ),
+
+                        const SizedBox(height: 20,),
+                        //company
+                        Container(
+                          alignment: Alignment.topLeft,
+
+                          child: const Text(
+                            'Company',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+
+                        const SizedBox(height: 10,),
+                        Theme(
+                          data: ThemeData.dark(),
+                          child: TextFormField(
+
+                            controller: textControllerRCompany,
+                            decoration: const InputDecoration(
+                              label: Text('Something Inc'),
+                              floatingLabelBehavior: FloatingLabelBehavior.never,
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white),
+                              ),
+                              border: OutlineInputBorder(),
+                            ),
+                            cursorColor: Colors.white,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Company field cannot be empty';
                               }
                               return null;
                             },
                           ),
                         ),
-                        const SizedBox(height: 15),
+                        //email
+
+                        const SizedBox(height: 20,),
+
                         Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 0),
+                          alignment: Alignment.topLeft,
+
+                          child: const Text(
+                            'Email',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        const SizedBox(height: 10,),
+                        Theme(
+                          data: ThemeData.dark(),
+                          child: TextFormField(
+                            controller: textControllerREmail,
+                            decoration: const InputDecoration(
+                              label: Text('vitalik@gmail.com'),
+                              floatingLabelBehavior: FloatingLabelBehavior.never,
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white),
+                              ),
+                              border: OutlineInputBorder(),
+                            ),
+                            cursorColor: Colors.white,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Email field cannot be empty';
+                              }
+                              if (!value.contains('@')) {
+                                return 'Please enter a valid email containing @';
+                              }
+                              if (!value.endsWith('.com')) {
+                                return 'Please enter a valid email ending with .com';
+                              }
+                              return null;
+                              return null;
+                            },
+                          ),
+                        ),
+
+                        const SizedBox(height: 20,),
+
+                        //phone
+                        Container(
+                          alignment: Alignment.topLeft,
+
+                          child: const Text(
+                            'Phone',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        const SizedBox(height: 10,),
+                        Theme(
+                          data: ThemeData.dark(),
+                          child: TextFormField(
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(15),
+                            ],
+                            keyboardType: TextInputType.phone,
+                            controller: textControllerRPhone,
+                            decoration: const InputDecoration(
+                              label: Text('+7783420148392'),
+                              floatingLabelBehavior: FloatingLabelBehavior.never,
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white),
+                              ),
+                              border: OutlineInputBorder(),
+                            ),
+                            cursorColor: Colors.white,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Phone field cannot be empty';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 20,),
+                        Container(
+
                           width: double.infinity,
                           decoration: BoxDecoration(
                             color: Colors.blue,
@@ -3352,11 +3172,20 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                           ),
                           child: TextButton(
                             onPressed: () {
-                              if (_formKey.currentState?.validate() ?? false) {
+                              setState(() {
+
+                              });
+                              if (formKey.currentState?.validate() ?? false) {
                                 setState(() {
-                                  widget.newResumeMdoel.certifications[index].certificationName = textControllerCertificationTitle.text;
-                                });
-                                Navigator.of(context)..pop()..pop();
+                                  final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                                  resumeViewModel.addReference(widget.index, Reference(name: textControllerRName.text, position: textControllerRPostition.text, company: textControllerRCompany.text, email: textControllerREmail.text, phone: textControllerRPhone.text)
+                                  );
+                                  resumeViewModel.updateFullness(widget.newResumeMdoel);
+                                }
+                                );
+                                textControllerLanguage.clear();
+                                textControllerLevel.clear();
+                                Navigator.pop(context);
                               }
                             },
                             child: const Text(
@@ -3376,70 +3205,253 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
       },
     );
   }
+  Future refrenceEditSheet(index) {
+    final textControllerRName = TextEditingController(text: widget.newResumeMdoel.refrences[index].name);
+    final textControllerRCompany = TextEditingController(text: widget.newResumeMdoel.refrences[index].company);
+    final textControllerRPostition = TextEditingController(text: widget.newResumeMdoel.refrences[index].position);
+    final textControllerRPhone = TextEditingController(text: widget.newResumeMdoel.refrences[index].phone);
+    final textControllerREmail = TextEditingController(text: widget.newResumeMdoel.refrences[index].email);
 
-  Future rename_skill(int index) {
-    final textControllerSkillName = TextEditingController(text: widget.newResumeMdoel.skills[index].skillName);
-    final _formKey = GlobalKey<FormState>();
+    final formKey = GlobalKey<FormState>();
 
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: Container(
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.only(
-                topRight: Radius.circular(20),
-                topLeft: Radius.circular(20),
-              ),
-              color: Color(0xFF454545),
-            ),
-            width: double.infinity,
-            child: FractionallySizedBox(
-              child: Container(
-                padding: const EdgeInsets.all(30),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF454545),
-                  borderRadius: BorderRadius.circular(20),
+        return FractionallySizedBox(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Container(
+              padding: const EdgeInsets.only(bottom: 20),
+              decoration: const BoxDecoration(
+                color: Color(0xFF454545),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
                 ),
+              ),
+              child: SingleChildScrollView(
                 child: Form(
-                  key: _formKey,
-                  child: SingleChildScrollView(
+                  key: formKey,
+                  child: Container(
+                    margin: const EdgeInsets.only(left: 20, right: 20, top: 10),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const SizedBox(height: 5),
-                        const Align(
+                        const SizedBox(height: 20),
+                        // Name
+                        Container(
                           alignment: Alignment.topLeft,
-                          child: Text(
-                            'Enter Skill',
-                            style: TextStyle(color: Colors.white),
+
+                          child: const Text(
+                            'Name',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                           ),
                         ),
-                        const SizedBox(height: 5),
+                        const SizedBox(height: 10),
                         Theme(
                           data: ThemeData.dark(),
-                          child: TextFormField(
-                            controller: textControllerSkillName,
-                            decoration: const InputDecoration(
-                              labelText: 'Skill Name',
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TextFormField(
+                                controller: textControllerRName,
+                                decoration: const InputDecoration(
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.white),
+                                  ),
+                                  border: OutlineInputBorder(),
+                                ),
+                                cursorColor: Colors.white,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Name field cannot be empty';
+                                  }
+                                  return null;
+                                },
                               ),
-                              border: OutlineInputBorder(),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Skill name cannot be empty';
-                              }
-                              return null;
-                            },
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 15),
+
+                        const SizedBox(height: 20),
+                        // Position
                         Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 0),
+                          alignment: Alignment.topLeft,
+
+                          child: const Text(
+                            'Position',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Theme(
+                          data: ThemeData.dark(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TextFormField(
+                                controller: textControllerRPostition,
+                                decoration: const InputDecoration(
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.white),
+                                  ),
+                                  border: OutlineInputBorder(),
+                                ),
+                                cursorColor: Colors.white,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Position field cannot be empty';
+                                  }
+                                  return null;
+                                },
+                              ),
+
+
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Company
+                        Container(
+                          alignment: Alignment.topLeft,
+
+                          child: const Text(
+                            'Company',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Theme(
+                          data: ThemeData.dark(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                height: 50, // Fixed height for the TextFormField
+                                child: TextFormField(
+                                  controller: textControllerRCompany,
+                                  decoration: const InputDecoration(
+                                    label: Text('Something Inc'),
+                                    floatingLabelBehavior: FloatingLabelBehavior.never,
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.white),
+                                    ),
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  cursorColor: Colors.white,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Company field cannot be empty';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: 5), // Space for error message
+
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        // Email
+                        Container(
+                          alignment: Alignment.topLeft,
+
+                          child: const Text(
+                            'Email',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Theme(
+                          data: ThemeData.dark(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TextFormField(
+                                controller: textControllerREmail,
+                                decoration: const InputDecoration(
+                                  label: Text('vitalik@gmail.com'),
+                                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.white),
+                                  ),
+                                  border: OutlineInputBorder(),
+                                ),
+                                cursorColor: Colors.white,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Email field cannot be empty';
+                                  }
+                                  if (!value.contains('@')) {
+                                    return 'Please enter a valid email containing @';
+                                  }
+                                  if (!value.endsWith('.com')) {
+                                    return 'Please enter a valid email ending with .com';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 5), // Space for error message
+
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        // Phone
+                        Container(
+                          alignment: Alignment.topLeft,
+                          child: const Text(
+                            'Phone',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Theme(
+                          data: ThemeData.dark(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                height: 50, // Fixed height for the TextFormField
+                                child: TextFormField(
+                                  inputFormatters: [
+                                    LengthLimitingTextInputFormatter(15),
+                                  ],
+                                  keyboardType: TextInputType.phone,
+                                  controller: textControllerRPhone,
+                                  decoration: const InputDecoration(
+                                    label: Text('+7783420148392'),
+                                    floatingLabelBehavior: FloatingLabelBehavior.never,
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.white),
+                                    ),
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  cursorColor: Colors.white,
+                                  validator: (value)
+                                  {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Phone field cannot be empty';
+                                    }
+                                    if (value.endsWith('.com')) {
+                                      return 'Phone cannot end with .com';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: 5), // Space for error message
+
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Container(
+
                           width: double.infinity,
                           decoration: BoxDecoration(
                             color: Colors.blue,
@@ -3447,13 +3459,14 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                           ),
                           child: TextButton(
                             onPressed: () {
-                              if (_formKey.currentState?.validate() ?? false)
-                              {
-                                setState(()
-                                {
-                                  widget.newResumeMdoel.skills[index].skillName = textControllerSkillName.text;
+                              if (formKey.currentState?.validate() ?? false) {
+                                setState(() {
+
+                                  final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                                  resumeViewModel.editReference(widget.index, index, Reference(name:textControllerRName.text,company:  textControllerRCompany.text, position: textControllerRPostition.text, email: textControllerREmail.text, phone: textControllerRPhone.text, ));
+                                  resumeViewModel.updateFullness(widget.newResumeMdoel);
                                 });
-                                Navigator.of(context)..pop()..pop();
+                                Navigator.pop(context);
                               }
                             },
                             child: const Text(
@@ -3473,12 +3486,151 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
       },
     );
   }
+Future refrenceDot(index)
+{
+  return  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return Container(
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(20),
+            topLeft: Radius.circular(20),
+          ),
+          color: Color(0xFF454545),
+        ),
+        width: double.infinity,
+        child: FractionallySizedBox(
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF454545),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      refrenceEditSheet(index);
+                    });
+                  },
+                  style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                  child: const ListTile(
+                    leading: Icon(Icons.edit, color: Colors.white),
+                    title: Text(
+                      'Edit',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+
+                const Divider(height: 1, color: Colors.white24),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                      resumeViewModel.deleteReference(widget.index, index);
+                      resumeViewModel.updateFullness(widget.newResumeMdoel);
+                    });
+                    Navigator.pop(context);
+                  },
+                  style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                  child: const ListTile(
+                    leading: Icon(Icons.delete, color: Colors.red),
+                    title: Text(
+                      'Delete',
+                      style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+
+}
 
 
-  Future rename_lang(int index) {
-    final textControllerLanguage = TextEditingController(text: widget.newResumeMdoel.languages[index].language);
-    final textControllerLevel = TextEditingController(text: widget.newResumeMdoel.languages[index].level);
-    final _formKey = GlobalKey<FormState>();
+
+  Future skillDot(index)
+  {
+    return showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(20),
+              topLeft: Radius.circular(20),
+            ),
+            color: Color(0xFF454545),
+          ),
+          width: double.infinity,
+          child: FractionallySizedBox(
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF454545),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+
+                        edit_skill(index);
+                      });
+                    },
+                    style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                    child: const ListTile(
+                      leading: Icon(Icons.edit, color: Colors.white),
+                      title: Text(
+                        'Edit',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+
+
+                  const Divider(height: 1, color: Colors.white24),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                        resumeViewModel.deleteSkill(widget.index, index);
+                        resumeViewModel.updateFullness(widget.newResumeMdoel);
+                      });
+                      Navigator.pop(context);
+                    },
+                    style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                    child: const ListTile(
+                      leading: Icon(Icons.delete, color: Colors.red),
+                      title: Text(
+                        'Delete',
+                        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+  Future edit_skill(int index) {
+    final textControllerSkillName = TextEditingController(text: widget.newResumeMdoel.skills[index].skillName);
+    final textControllerSkilllevel = TextEditingController(text: widget.newResumeMdoel.skills[index].level);
+
+    final formKey = GlobalKey<FormState>();
 
     return showModalBottomSheet(
       context: context,
@@ -3503,87 +3655,165 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Form(
-                  key: _formKey,
+                  key: formKey,
                   child: SingleChildScrollView(
+                    child: Container(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+
+                          CustomTextFieldValidate(
+                            labelText: 'Skill',
+                            controller: textControllerSkillName, hintText: 'Excel',
+                            onChanged: (String ) {  },
+
+                            validator: (value) {
+                              if (value == null || value.isEmpty)
+                              {
+                                return 'Skill cannot be empty';
+                              }
+                              return null;
+                            }, keyboardType: TextInputType.text,
+                          ),
+                          const SizedBox(height: 10),
+                          CustomTextFieldValidate(
+                            labelText: 'Skill Level',
+                            controller: textControllerSkilllevel, hintText: '20%',
+                            onChanged: (value ) {if (value.isNotEmpty) {
+                              if (int.parse(value) >= 100) {
+                                textControllerSkilllevel.text = "100";
+                              }
+                              if (int.parse(value) <= 0) {
+                                textControllerSkilllevel.text = "0";
+                              }
+                            }  },
+
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Level field cannot be empty';
+                              }
+                              final int? level = int.tryParse(value);
+                              if (level == null || level < 0 || level > 100) {
+                                return 'Please enter a value between 0 and 100';
+                              }
+                              return null;
+                            }, keyboardType: TextInputType.text,
+                          ),
+
+                          const SizedBox(height: 10),
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 0),
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.blue,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: TextButton(
+                              onPressed: () {
+                                if (formKey.currentState?.validate() ?? false)
+                                {
+                                  setState(()
+                                  {
+                                    widget.newResumeMdoel.skills[index].skillName = textControllerSkillName.text;
+                                    widget.newResumeMdoel.skills[index].level=textControllerSkilllevel.text;
+                                    final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                                    resumeViewModel.editSkill(widget.index,index,Skill(skillName: textControllerSkillName.text,level: textControllerSkilllevel.text),);
+                                    resumeViewModel.updateFullness(widget.newResumeMdoel);
+                                  });
+                                  Navigator.of(context)..pop()..pop();
+                                }
+                              },
+                              child: const Text(
+                                'Save',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+  Future SkillSheet() {
+    final textControllerSkillName = TextEditingController();
+    final textControllerSkillLevel = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return FractionallySizedBox(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Container(
+              padding: const EdgeInsets.only(bottom: 20),
+              decoration: const BoxDecoration(
+                color: Color(0xFF454545),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+              child: Container(
+
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+
+                child: SingleChildScrollView(
+                  child: Form(
+                    key: formKey,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const SizedBox(height: 15),
-                        const Align(
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            'Enter Language',
-                            style: TextStyle(color: Colors.white),
-                            textAlign: TextAlign.start,
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        Theme(
-                          data: ThemeData.dark(),
-                          child: TextFormField(
-                            controller: textControllerLanguage,
-                            decoration: const InputDecoration(
-                              labelText: 'Language',
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                              border: OutlineInputBorder(),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Language cannot be empty';
-                              }
-                              return null;
-                            },
-                          ),
+                        const SizedBox(height: 20),
+                        CustomTextFieldValidate(
+                          labelText: 'Skill',
+                          controller: textControllerSkillName, hintText: 'Excel',
+                          onChanged: (String ) {  },
+
+                          validator: (value) {
+                            if (value == null || value.isEmpty)
+                            {
+                              return 'Skill cannot be empty';
+                            }
+                            return null;
+                          }, keyboardType: TextInputType.text,
                         ),
                         const SizedBox(height: 10),
-                        const Align(
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            'Enter Level',
-                            style: TextStyle(color: Colors.white),
-                            textAlign: TextAlign.start,
-                          ),
+                        CustomTextFieldValidate(
+                          labelText: 'Skill Level',
+                          controller: textControllerSkillLevel, hintText: '20%',
+                          onChanged: (value ) {if (value.isNotEmpty) {
+                            if (int.parse(value) >= 100) {
+                              textControllerSkillLevel.text = "100";
+                            }
+                            if (int.parse(value) <= 0) {
+                              textControllerSkillLevel.text = "0";
+                            }
+                          }  },
+
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Level field cannot be empty';
+                            }
+                            final int? level = int.tryParse(value);
+                            if (level == null || level < 0 || level > 100) {
+                              return 'Please enter a value between 0 and 100';
+                            }
+                            return null;
+                          }, keyboardType: TextInputType.text,
                         ),
-                        const SizedBox(height: 5),
-                        Theme(
-                          data: ThemeData.dark(),
-                          child: TextFormField(
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(3),
-                            ],
-                            onChanged: (value) {
-                              if (value.isNotEmpty) {
-                                if (int.parse(value) >= 100) {
-                                  textControllerLevel.text = "100";
-                                  textControllerLevel.selection = TextSelection.collapsed(offset: textControllerLevel.text.length);
-                                }
-                              }
-                            },
-                            controller: textControllerLevel,
-                            decoration: const InputDecoration(
-                              labelText: 'Level Percentage',
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                              border: OutlineInputBorder(),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Level cannot be empty';
-                              }
-                              final intValue = int.tryParse(value);
-                              if (intValue == null || intValue < 0 || intValue > 100) {
-                                return 'Please enter a valid level (0-100)';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 15),
+
+                        const SizedBox(height: 10),
                         Container(
+
                           width: double.infinity,
                           decoration: BoxDecoration(
                             color: Colors.blue,
@@ -3591,12 +3821,16 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                           ),
                           child: TextButton(
                             onPressed: () {
-                              if (_formKey.currentState?.validate() ?? false) {
+
+                              if (formKey.currentState?.validate() ?? false)
+                              {
                                 setState(() {
-                                  widget.newResumeMdoel.languages[index].language = textControllerLanguage.text;
-                                  widget.newResumeMdoel.languages[index].level = textControllerLevel.text;
+                                  final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                                  resumeViewModel.addSkill(widget.index,Skill(skillName: textControllerSkillName.text,level: textControllerSkillLevel.text),);
+                                  resumeViewModel.updateFullness(widget.newResumeMdoel);
                                 });
-                                Navigator.of(context)..pop()..pop();
+                                textControllerSkillName.clear();
+                                Navigator.pop(context);
                               }
                             },
                             child: const Text(
@@ -3618,9 +3852,214 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
   }
 
 
-  Future edit_lang(int index) {
+  Future lanuageSheet() {
+    final textControllerLanguage = TextEditingController();
+    final textControllerLevel = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return FractionallySizedBox(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Container(
+              padding: const EdgeInsets.only(bottom: 20),
+              decoration: const BoxDecoration(
+                color: Color(0xFF454545),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+
+                child: SingleChildScrollView(
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+
+                        const SizedBox(height: 20),
+                        CustomTextFieldValidate(
+                          labelText: 'Language',
+                          controller: textControllerLanguage, hintText: 'English',
+                          onChanged: (String ) {  },
+
+                          validator: (value) {
+                            if (value == null || value.isEmpty)
+                            {
+                              return 'Language cannot be empty';
+                            }
+                            return null;
+                          }, keyboardType: TextInputType.text,
+                        ),
+                        const SizedBox(height: 10),
+                        CustomTextFieldValidate(
+                          labelText: 'Language Proficiency Level',
+                          controller: textControllerLevel, hintText: '20',
+                          onChanged: (value ) { if (value.isNotEmpty) {
+                            if (int.parse(value) >= 100) {
+                              textControllerLevel.text = "100";
+                            }
+                            if (int.parse(value) <= 0) {
+                              textControllerLevel.text = "0";
+                            }
+                          } },
+
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Level field cannot be empty';
+                            }
+                            final int? level = int.tryParse(value);
+                            if (level == null || level < 0 || level > 100) {
+                              return 'Please enter a value between 0 and 100';
+                            }
+                            return null;
+                          }, keyboardType: TextInputType.phone,
+                          inputFormatter: [FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(3),],
+                        ),
+                        const SizedBox(height: 10),
+                        Container(
+
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: TextButton(
+                            onPressed: () {
+                              setState(() {
+
+                              });
+                              if (formKey.currentState?.validate() ?? false) {
+                                setState(() {
+                                  final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                                  resumeViewModel.addLanguage(widget.index,
+                                    Language(
+                                      language: textControllerLanguage.text,
+                                      level: textControllerLevel.text,
+                                    ),
+                                  );
+
+                                  resumeViewModel.updateFullness(widget.newResumeMdoel);
+                                });
+                                textControllerLanguage.clear();
+                                textControllerLevel.clear();
+                                Navigator.pop(context);
+                              }
+                            },
+                            child: const Text(
+                              'Save',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+  Future languageDot(index)
+  {
+    return showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(20),
+              topLeft: Radius.circular(20),
+            ),
+            color: Color(0xFF454545),
+          ),
+          width: double.infinity,
+          child: FractionallySizedBox(
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF454545),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        rename_lang(index);
+                      });
+                    },
+                    style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                    child: const ListTile(
+                      leading: Icon(Icons.edit, color: Colors.white),
+                      title: Text(
+                        'Edit',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 1, color: Colors.white24),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        edit_lang(index);
+                      });
+
+                    },
+                    style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                    child: const ListTile(
+                      leading: Icon(Icons.edit, color: Colors.white),
+                      title: Text(
+                        'Rename',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 1, color: Colors.white24),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+
+                        final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+                        resumeViewModel.deleteLanguage(widget.index,index);
+                        resumeViewModel.updateFullness(widget.newResumeMdoel);
+                      });
+                      Navigator.pop(context);
+                    },
+                    style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                    child: const ListTile(
+                      leading: Icon(Icons.delete, color: Colors.red),
+                      title: Text(
+                        'Delete',
+                        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+
+  Future rename_lang(int index) {
     final textControllerLanguage = TextEditingController(text: widget.newResumeMdoel.languages[index].language);
-    final _formKey = GlobalKey<FormState>();
+    final textControllerLevel = TextEditingController(text: widget.newResumeMdoel.languages[index].level);
+    final formKey = GlobalKey<FormState>();
 
     return showModalBottomSheet(
       context: context,
@@ -3639,45 +4078,58 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
             width: double.infinity,
             child: FractionallySizedBox(
               child: Container(
-                padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 40),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: const Color(0xFF454545),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Form(
-                  key: _formKey,
+                  key: formKey,
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Align(
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            'Enter Language',
-                            style: TextStyle(color: Colors.white),
-                            textAlign: TextAlign.start,
-                          ),
+                        const SizedBox(height: 20),
+                        CustomTextFieldValidate(
+                          labelText: 'Language',
+                          controller: textControllerLanguage, hintText: 'English',
+                          onChanged: (String ) {  },
+
+                          validator: (value) {
+                            if (value == null || value.isEmpty)
+                            {
+                              return 'Language cannot be empty';
+                            }
+                            return null;
+                          }, keyboardType: TextInputType.text,
                         ),
-                        const SizedBox(height: 15),
-                        Theme(
-                          data: ThemeData.dark(),
-                          child: TextFormField(
-                            controller: textControllerLanguage,
-                            decoration: const InputDecoration(
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                              border: OutlineInputBorder(),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Language cannot be empty';
-                              }
-                              return null;
-                            },
-                          ),
+                        const SizedBox(height: 10),
+                        CustomTextFieldValidate(
+                          labelText: 'Language Proficiency Level',
+                          controller: textControllerLanguage, hintText: '20',
+                          onChanged: (value ) { if (value.isNotEmpty) {
+                            if (int.parse(value) >= 100) {
+                              textControllerLevel.text = "100";
+                            }
+                            if (int.parse(value) <= 0) {
+                              textControllerLevel.text = "0";
+                            }
+                          } },
+
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Level field cannot be empty';
+                            }
+                            final int? level = int.tryParse(value);
+                            if (level == null || level < 0 || level > 100) {
+                              return 'Please enter a value between 0 and 100';
+                            }
+                            return null;
+                          }, keyboardType: TextInputType.number,
+                          inputFormatter: [FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(3),],
                         ),
-                        const SizedBox(height: 15),
+                        const SizedBox(height: 10),
                         Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
@@ -3686,9 +4138,10 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                           ),
                           child: TextButton(
                             onPressed: () {
-                              if (_formKey.currentState?.validate() ?? false) {
+                              if (formKey.currentState?.validate() ?? false) {
                                 setState(() {
-                                  widget.newResumeMdoel.languages[index].language = textControllerLanguage.text;
+
+                                  resumeViewModel.editLangauges(widget.index,index,Language(language:textControllerLanguage.text ,level:textControllerLevel.text ));
                                 });
                                 Navigator.of(context)..pop()..pop();
                               }
@@ -3699,8 +4152,92 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                             ),
                           ),
                         ),
-                        const SizedBox(height: 5),
                       ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+  Future edit_lang(int index) {
+    final textControllerLanguage = TextEditingController(text: widget.newResumeMdoel.languages[index].language);
+    final formKey = GlobalKey<FormState>();
+
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: Container(
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(20),
+                topLeft: Radius.circular(20),
+              ),
+              color: Color(0xFF454545),
+            ),
+            width: double.infinity,
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 10),
+              child: FractionallySizedBox(
+                child: Container(
+                  padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 40),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF454545),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Form(
+                    key: formKey,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(height: 20),
+                          CustomTextFieldValidate(
+                            labelText: 'Language',
+                            controller: textControllerLanguage, hintText: 'English',
+                            onChanged: (String ) {  },
+
+                            validator: (value) {
+                              if (value == null || value.isEmpty)
+                              {
+                                return 'Language cannot be empty';
+                              }
+                              return null;
+                            }, keyboardType: TextInputType.text,
+                          ),
+                          const SizedBox(height: 10),
+                          Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.blue,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: TextButton(
+                              onPressed: () {
+                                if (formKey.currentState?.validate() ?? false)
+                                {
+                                  setState(()
+                                  {
+                                    widget.newResumeMdoel.languages[index].language = textControllerLanguage.text;
+                                  });
+                                  Navigator.of(context)..pop()..pop();
+                                }
+                              },
+                              child: const Text(
+                                'Save',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                        ],
+                      ),
                     ),
                   ),
                 ),

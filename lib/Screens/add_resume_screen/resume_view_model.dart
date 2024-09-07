@@ -1,231 +1,417 @@
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:resume_maker/Models/model_resume.dart';
 import 'package:resume_maker/Screens/add_resume_screen/resume_2.dart';
 
+class ResumeViewModelProvider extends ChangeNotifier {
+  // Hive box to store resumes
+  Box<ResumeModel> resumeBox;
 
-class ResumeViewModelProvider extends ChangeNotifier
-{
+  // List of resumes (fetched from Hive)
+  List<ResumeModel> _resumes = [];
+
+  ResumeModel? _currentResume;
   double _count = 0;
 
-  void setCount(double newCount) {
-    _count = newCount;
-    notifyListeners();
+  ResumeViewModelProvider({required this.resumeBox}) {
+    // Load all resumes from the Hive box at the start
+    _resumes = resumeBox.values.toList();
   }
-  double get count => _count;
-  final List<ResumeModel> _resumes = [];
-  ResumeModel? _currentResume;
 
-  List<Map<String, String>> get resumes
-  {
-    return _resumes.map((resume)
-    {
+  // Get the current list of resumes
+  List<Map> get resumes {
+    return _resumes.map((resume) {
       return {
-        'title': resume.title ?? ' ',
-        'job': resume.job ?? ' ',
+        'title': resume.title,
+        'job': resume.job,
+        'fullness': resume.fullness ?? 0,
       };
     }).toList();
   }
 
+  double get count => _count;
 
-  // Set the current resume
-  void setCurrentResume(ResumeModel resume) {
-    _currentResume = resume;
-  }
-
-  // Add a new resume
-  void addNewResume(BuildContext context,String newJob,String newTitle) {
+  void addNewResume(BuildContext context, String newJob, String newTitle) {
     final newResume = ResumeModel(
-        title: newTitle,
-        job: newJob,
-        fullness: 0,
-        intro: Intro(
-          firstName: '',
-          lastName: '',
-          summary: '',
-        ),
-        contact: Contact(
-          email: '',
-          phoneNumber: '',
-          website: '',
-          address: '',
-        ),
-        education: [],
-        experience: [],
-        descriptions: [],
-        skills: [],
-        languages: [],
-        certifications: []
+      title: newTitle,
+      job: newJob,
+      fullness: 0,
+      intro: Intro(
+        firstName: '',
+        lastName: '',
+        summary: '',
+      ),
+      contact: Contact(
+        email: '',
+        phoneNumber: '',
+        website: '',
+        address: '',
+      ),
+      education: [],
+      experience: [],
+      descriptions: [],
+      skills: [],
+      languages: [],
+      certifications: [],
+      refrences: [],
     );
-    _resumes.add(newResume);
+
+    resumeBox.add(newResume);
+    _resumes = resumeBox.values.toList();
     setCurrentResume(newResume);
+    final index = _resumes.length-1;
     notifyListeners();
 
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => Resume_Details(newResumeMdoel: newResume,),
+        builder: (context) => Resume_Details(newResumeMdoel: newResume,index: index,),
       ),
     );
-
   }
 
-  // Delete a resume
+  // Set the current resume
+  void setCurrentResume(ResumeModel resume) {
+    updateFullness(resume);
+    _currentResume = resume;
+  }
+
+  // Delete a resume from Hive
   void delete(int index) {
     if (index >= 0 && index < _resumes.length) {
-      _resumes.removeAt(index);
+      resumeBox.deleteAt(index); // Delete from Hive
+      _resumes = resumeBox.values.toList(); // Reload resumes from Hive
+      notifyListeners();
     }
   }
 
   // Rename the title of a resume
-  void renameTitle(int index, String newTitle,String job) {
-    print(job);
+  void renameTitle(int index, String newTitle, String job) {
     if (index >= 0 && index < _resumes.length) {
-      _resumes[index] = ResumeModel(
-        title: newTitle,
-        job: job,
-        intro: _resumes[index].intro,
-        contact: _resumes[index].contact,
-        education: _resumes[index].education,
-        experience: _resumes[index].experience,
-        descriptions: _resumes[index].descriptions,
-        skills: _resumes[index].skills,
-        languages: _resumes[index].languages,
-        certifications: _resumes[index].certifications, // Ensure certifications are preserved
-      );
+      final updatedResume = _resumes[index];
+      updatedResume.title = newTitle;
+      updatedResume.job = job;
+
+      resumeBox.putAt(index, updatedResume); // Update in Hive
+      _resumes = resumeBox.values.toList();
+      notifyListeners();
     }
   }
-  String job_return(index)
-  {
+
+  // Get job for a specific resume
+  String jobReturn(int index) {
     return _resumes[index].job.toString();
   }
 
-
-
-  // Edit a resume
+  // Edit an existing resume
   void edit(int index, BuildContext context) {
     if (index >= 0 && index < _resumes.length) {
-
       final resume = _resumes[index];
-
       setCurrentResume(resume);
-      Navigator.pop(context);
-      Navigator.push(
+
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => Resume_Details(newResumeMdoel: resume,index: index,),
+          builder: (context) => Resume_Details(newResumeMdoel: resume, index: index),
         ),
       );
     }
   }
 
-
-  double calculateFullness(ResumeModel resume)
-  {
+  // Calculate the fullness of the resume
+  double calculateFullness(ResumeModel resume) {
     double count = 0;
-    double divider = (100 / 14);
+    double divider = 100 / 16;
 
     if (resume.title.isNotEmpty) count += divider;
     if (resume.job.isNotEmpty) count += divider;
-    if (resume.intro!.lastName.isNotEmpty) count += divider;
-    if (resume.intro!.firstName.isNotEmpty) count += divider;
-    if (resume.intro!.summary.isNotEmpty) count += divider;
-    if (resume.contact!.website.isNotEmpty) count += divider;
-    if (resume.contact!.email.isNotEmpty) count += divider;
-    if (resume.contact!.phoneNumber.isNotEmpty) count += divider;
-    if (resume.contact!.address.isNotEmpty) count += divider;
+    if (resume.intro?.lastName.isNotEmpty ?? false) count += divider;
+    if (resume.intro?.firstName.isNotEmpty ?? false) count += divider;
+    if (resume.intro?.summary.isNotEmpty ?? false) count += divider;
+    if (resume.contact?.website.isNotEmpty ?? false) count += divider;
+    if (resume.contact?.email.isNotEmpty ?? false) count += divider;
+    if (resume.contact?.phoneNumber.isNotEmpty ?? false) count += divider;
+    if (resume.contact?.address.isNotEmpty ?? false) count += divider;
     if (resume.education.isNotEmpty) count += divider;
     if (resume.experience.isNotEmpty) count += divider;
     if (resume.descriptions.isNotEmpty) count += divider;
     if (resume.skills.isNotEmpty) count += divider;
     if (resume.languages.isNotEmpty) count += divider;
     if (resume.certifications.isNotEmpty) count += divider;
-
+    if (resume.profile_image != null) count += divider;
+    if (resume.refrences.isNotEmpty) count += divider;
+//  if (resume.profile_image != null && resume.profile_image!.existsSync()) count += divider;
     setCount(count);
     notifyListeners();
-    return double.parse(count.toStringAsFixed(1));
-
+    return double.parse(count.toStringAsFixed(0));
   }
 
-  void updateFullness(int index) {
-    //print('hre');
-    final resume = _resumes[index];
+  // Update fullness of the resume
+  void updateFullness(ResumeModel resume) {
     double fullness = calculateFullness(resume);
     resume.fullness = fullness;
-    _count =fullness;
+    _count = fullness;
     notifyListeners();
   }
 
-
-
-  void updateFullness2(ResumeModel resume)
-  {
-    print('hre24');
-    double fullness = calculateFullness(resume);
-    resume.fullness = fullness;
-    _count =fullness;
-    print(resume.fullness);
-    print('object');
-    notifyListeners();
-    print(fullness);
-  }
-
-  double getLength(int index) {
-    //updateFullness(index);
-    updateFullness(index);
-    double cut=0;
-    _count=_resumes[index].fullness!;
-
-    print(_resumes[index].fullness);
-    notifyListeners();
-    return _count;
-  }
-
-  // Add education to the current resume
-  void addEducation(Education education) {
-    if (_currentResume != null)
-    {
-      _currentResume!.education.add(education);
-    }
-    else
-      {
-        print('no');
-      }
-  }
-
-  // Add experience to the current resume
-  void addExperience(Experience experience) {
-    if (_currentResume != null)
-    {
-      _currentResume!.experience.add(experience);
-    }
-  }
-
-
-  void addCertification(String certificationName) {
+  void addEducation(int indexResume,Education education) {
     if (_currentResume != null) {
-      final newCertification = Certification(certificationName: certificationName);
-      _currentResume!.certifications.add(newCertification); // Add the new certification
+      final updatedResume = _resumes[indexResume];
+      updatedResume!.education.add(education);
+      updateFullness(updatedResume!);
+      resumeBox.put(updatedResume!.key, updatedResume!); // Update in Hive
+      notifyListeners();
     }
   }
+  void deleteEducation(int indexResume,int index) {
+    if (_currentResume != null && index >= 0 && index < _currentResume!.education.length) {
+      final updatedResume = _resumes[indexResume];
+      updatedResume!.education.removeAt(index);
+      updateFullness(updatedResume!);
+      resumeBox.put(updatedResume!.key, updatedResume!); // Update in Hive
+      notifyListeners();
+    }
+  }
+  void editEducation(int indexResume,int index,Education education) {
 
 
-  void editCertification(int index, Certification updatedCertification) {
+    final updatedResume = _resumes[indexResume];
+    updatedResume!.education[index]=education;
+    updateFullness(updatedResume!);
+    resumeBox.put(updatedResume!.key, updatedResume!); // Update in Hive
+    notifyListeners();
+
+  }
+
+  // Add experience to current resume
+  void addExperience(int indexResume,Experience experience) {
+    if (_currentResume != null) {
+      final updatedResume = _resumes[indexResume];
+      updatedResume!.experience.add(experience);
+      updateFullness(updatedResume!);
+      resumeBox.put(updatedResume!.key, updatedResume!); // Update in Hive
+      notifyListeners();
+    }
+  }
+  void deleteExperience(int indexResume,int index) {
+    if (_currentResume != null && index >= 0 && index < _currentResume!.experience.length) {
+      final updatedResume = _resumes[indexResume];
+      updatedResume!.experience.removeAt(index);
+      updateFullness(updatedResume!);
+      resumeBox.put(updatedResume!.key, updatedResume!);
+      notifyListeners();
+    }
+  }
+  void editExperience(int indexResume,int index,Experience experience) {
+
+    final updatedResume = _resumes[indexResume];
+    updatedResume!.experience[index]=experience;
+    updateFullness(updatedResume!);
+    resumeBox.put(updatedResume!.key, updatedResume!); // Update in Hive
+    notifyListeners();
+
+  }
+
+  // Add certification to current resume
+  void addCertification(int indexResume,Certification certification) {
+    if (_currentResume != null) {
+      final updatedResume = _resumes[indexResume];
+      updatedResume!.certifications.add(certification);
+      updateFullness(updatedResume!);
+      resumeBox.put(updatedResume!.key, updatedResume!); // Update in Hive
+      notifyListeners();
+    }
+  }
+  void deleteCertification(int indexResume,int index) {
     if (_currentResume != null && index >= 0 && index < _currentResume!.certifications.length) {
-      _currentResume!.certifications[index] = updatedCertification;
+      final updatedResume = _resumes[indexResume];
+      updatedResume!.certifications.removeAt(index);
+      updateFullness(updatedResume!);
+      resumeBox.put(updatedResume!.key, updatedResume!); // Update in Hive
+      notifyListeners();
     }
   }
+  void editCertification(int indexResume,int index,Certification certification) {
 
-  void addLanguage(Language language) {
+    final updatedResume = _resumes[indexResume];
+    updatedResume!.certifications[index]=certification;
+    updateFullness(updatedResume!);
+    resumeBox.put(updatedResume!.key, updatedResume!); // Update in Hive
+    notifyListeners();
+
+  }
+
+
+  void AddFirstName(int indexResume,String intro)
+  {
+    final updatedResume = _resumes[indexResume];
+    updatedResume.intro!.firstName=intro;
+    updateFullness(updatedResume);
+    resumeBox.put(updatedResume.key, updatedResume);
+    notifyListeners();
+  }
+  void AddLastName(int indexResume,String intro)
+  {
+    final updatedResume = _resumes[indexResume];
+    updatedResume.intro!.lastName=intro;
+    updateFullness(updatedResume);
+    resumeBox.put(updatedResume.key, updatedResume);
+    notifyListeners();
+  }
+  void AddSummaryName(int indexResume,String intro)
+  {
+    final updatedResume = _resumes[indexResume];
+    updatedResume.intro!.summary=intro;
+    updateFullness(updatedResume);
+    resumeBox.put(updatedResume.key, updatedResume);
+    notifyListeners();
+  }
+  void AddEmail(int indexResume,String intro)
+  {
+    final updatedResume = _resumes[indexResume];
+    updatedResume.contact!.email=intro;
+    updateFullness(updatedResume);
+    resumeBox.put(updatedResume.key, updatedResume);
+    notifyListeners();
+  }
+  void AddPhone(int indexResume,String intro)
+  {
+    final updatedResume = _resumes[indexResume];
+    updatedResume.contact!.phoneNumber=intro;
+    updateFullness(updatedResume);
+    resumeBox.put(updatedResume.key, updatedResume);
+    notifyListeners();
+  }
+  void AddWebsite(int indexResume,String intro)
+  {
+    final updatedResume = _resumes[indexResume];
+    updatedResume.contact!.website=intro;
+    updateFullness(updatedResume);
+    resumeBox.put(updatedResume.key, updatedResume);
+    notifyListeners();
+  }
+  void AddAddress(int indexResume,String intro)
+  {
+    final updatedResume = _resumes[indexResume];
+    updatedResume.contact!.address=intro;
+    updateFullness(updatedResume);
+    resumeBox.put(updatedResume.key, updatedResume);
+    notifyListeners();
+  }
+
+  // Add skill to current resume
+  void addSkill(int indexResume,Skill skill)
+  {
     if (_currentResume != null) {
-      _currentResume!.languages.add(language);
+      final updatedResume = _resumes[indexResume];
+      updatedResume!.skills.add(skill);
+      updateFullness(updatedResume);
+      resumeBox.put(updatedResume.key, updatedResume);
+      notifyListeners();
     }
   }
+  void deleteSkill(int indexResume,int index) {
+    if (_currentResume != null && index >= 0 && index < _currentResume!.skills.length) {
+      final updatedResume = _resumes[indexResume];
+      updatedResume!.skills.removeAt(index);
+      updateFullness(updatedResume!);
+      resumeBox.put(updatedResume!.key, updatedResume!); // Update in Hive
+      notifyListeners();
+    }
+  }
+  void editSkill(int indexResume,int index,Skill skill) {
 
-  void addSkill(Skill skill) {
+    final updatedResume = _resumes[indexResume];
+    updatedResume!.skills[index]=skill;
+    updateFullness(updatedResume!);
+    resumeBox.put(updatedResume!.key, updatedResume!); // Update in Hive
+    notifyListeners();
+
+  }
+
+  void addLanguage(int indexResume,Language language) {
     if (_currentResume != null) {
-      _currentResume!.skills.add(skill);
+      final updatedResume = _resumes[indexResume];
+      updatedResume!.languages.add(language);
+      updateFullness(updatedResume!);
+      resumeBox.put(updatedResume!.key, updatedResume!); // Update in Hive
+      notifyListeners();
     }
+  }
+  void deleteLanguage(int indexResume,int index) {
+    if (_currentResume != null && index >= 0 && index < _currentResume!.languages.length) {
+      final updatedResume = _resumes[indexResume];
+      updatedResume!.languages.removeAt(index);
+      updateFullness(updatedResume!);
+      resumeBox.put(updatedResume!.key, updatedResume!); // Update in Hive
+      notifyListeners();
+    }
+  }
+  void editLangauges(int indexResume,int index,Language language) {
+
+      final updatedResume = _resumes[indexResume];
+      updatedResume!.languages[index]=language;
+      updateFullness(updatedResume!);
+      resumeBox.put(updatedResume!.key, updatedResume!); // Update in Hive
+      notifyListeners();
+
+  }
+
+  void addReference(int indexResume,Reference reference) {
+    if (_currentResume != null) {
+      final updatedResume = _resumes[indexResume];
+      updatedResume!.refrences.add(reference);
+      updateFullness(updatedResume!);
+      resumeBox.put(updatedResume!.key, updatedResume!); // Update in Hive
+      notifyListeners();
+    }
+  }
+  void editReference(int indexResume,int index,Reference updatedReference) {
+    final updatedResume = _resumes[indexResume];
+    updatedResume!.refrences[index]=updatedReference;
+    updateFullness(updatedResume!);
+    resumeBox.put(updatedResume!.key, updatedResume!); // Update in Hive
+    notifyListeners();
+  }
+  void deleteReference(int indexResume,int index) {
+    final updatedResume = _resumes[indexResume];
+    updatedResume!.refrences.removeAt(index);
+    updateFullness(updatedResume!);
+    resumeBox.put(updatedResume!.key, updatedResume!);
+    notifyListeners();
   }
 
 
+  void setResumeSnapshot(Uint8List uint8list, ResumeModel resumeModel) {
+    resumeModel.resume_snapshot = uint8list;
+    resumeBox.put(resumeModel.key, resumeModel); // Update in Hive
+    notifyListeners();
+  }
+
+  Uint8List? getResumeSnapshot(int index) {
+    if (index >= 0 && index < _resumes.length) {
+      return _resumes[index].resume_snapshot;
+    } else {
+      return null;
+    }
+  }
+
+  void setCount(double newCount) {
+    _count = newCount;
+    notifyListeners();
+  }
+
+
+  void setProfileImage(image,index)
+  {
+    if (index == null)
+    {
+      return;
+    }
+    final updatedResume = _resumes[index];
+    updatedResume!.profile_image=image;
+    resumeBox.put(updatedResume!.key, updatedResume!);
+  }
 }

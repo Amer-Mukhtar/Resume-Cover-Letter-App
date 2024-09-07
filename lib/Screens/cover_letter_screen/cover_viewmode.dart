@@ -2,41 +2,18 @@ import 'package:flutter/material.dart';
 import '../../Models/model_cover.dart';
 import 'cover_letter_2.dart';
 
-class AddCover {
-  final titleController = TextEditingController();
-  final firstNameController = TextEditingController();
-  final lastNameController = TextEditingController();
-  final phoneController = TextEditingController();
-  final emailController = TextEditingController();
-  final addressController = TextEditingController();
-  final summaryController = TextEditingController();
+class CoverViewModelProvider extends ChangeNotifier
+{
 
-  newCoverLetterModel createCover() {
-    return newCoverLetterModel(
-      title: titleController.text,
-      firstName: firstNameController.text,
-      lastName: lastNameController.text,
-      phoneNumber: phoneController.text,
-      email: emailController.text,
-      address: addressController.text,
-      summary: summaryController.text,
-    );
+
+  final List<CoverLetterModel> _coverLetters = [];
+
+  void SetSummary(CoverLetterModel CLM,String summary)
+  {
+    CLM.summary=summary;
+    notifyListeners();
+
   }
-
-  void dispose() {
-    titleController.dispose();
-    firstNameController.dispose();
-    lastNameController.dispose();
-    phoneController.dispose();
-    emailController.dispose();
-    summaryController.dispose();
-    addressController.dispose();
-  }
-}
-
-class CoverMode {
-  final List<newCoverLetterModel> _coverLetters = [];
-
   List<Map<String, String>> get coverLetters {
     return _coverLetters.map((coverLetter) {
       return {
@@ -47,7 +24,7 @@ class CoverMode {
   }
 
   void addNewCover(BuildContext context) {
-    final newCover = newCoverLetterModel(
+    final newCover = CoverLetterModel(
         title: '-',
         summary: '',
         firstName: '',
@@ -71,10 +48,39 @@ class CoverMode {
       _coverLetters.removeAt(index);
     }
   }
+  double calculateFullness(CoverLetterModel cover)
+  {
+    double count = 0;
+    double divider = (100 / 7);
+
+    if (cover.title.isNotEmpty) count += divider;
+    if (cover.summary.isNotEmpty) count += divider;
+    if (cover.firstName!.isNotEmpty) count += divider;
+    if (cover.email!.isNotEmpty) count += divider;
+    if (cover.address!.isNotEmpty) count += divider;
+    if (cover.lastName!.isNotEmpty) count += divider;
+    if (cover.phoneNumber!.isNotEmpty) count += divider;
+
+
+    notifyListeners();
+    return double.parse(count.toStringAsFixed(0));
+
+  }
+
+  void updateFullness2(CoverLetterModel cover)
+  {
+    print('hre24');
+    double fullness = calculateFullness(cover);
+    cover.fullness = fullness;
+
+    print('object');
+    notifyListeners();
+
+  }
 
   void renameTitle(int index, String newTitle) {
     if (index >= 0 && index < _coverLetters.length) {
-      _coverLetters[index] = newCoverLetterModel(
+      _coverLetters[index] = CoverLetterModel(
         title: newTitle,
         summary: _coverLetters[index].summary,
         firstName: _coverLetters[index].firstName,
@@ -99,5 +105,6 @@ class CoverMode {
     }
   }
 }
+
 
 

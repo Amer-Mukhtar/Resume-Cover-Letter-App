@@ -1,36 +1,31 @@
-import 'dart:io';
-
+import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:resume_maker/Models/model_resume.dart';
-
-List timeline_List=[{
-  'title':'Borcelle Studio',
-  'subtitle':'Marketing Manager & Specialist',
-  'time':'2030-PRESENT'
-}];
-
-List timeline_exp=[{
-  'exp':'Developed and maintained relationships with partners,agencies and vendors to support marketing intitiatives',
-  'exp':'Developed and maintained relationships with partners,agencies and vendors to support marketing intitiatives',
-
-}];
+import 'package:open_file/open_file.dart';
+import 'dart:io';
+import 'package:pdfx/pdfx.dart' as pdfx;
+import 'package:image/image.dart' as img;
+import 'package:provider/provider.dart';
+import '../../Models/model_resume.dart';
+import '../add_resume_screen/resume_3.dart';
+import '../add_resume_screen/resume_view_model.dart';
 
 
-Future<void> createPdf_blue(ResumeModel newResumeMdoel) async {
 
-  Uint8List? _dot;
-  Uint8List? _profile;
-  Uint8List? _email;
-  Uint8List? _www;
-  Uint8List? _location;
-  Uint8List? _phone;
-  Uint8List? _dot_black;
+
+Future<void> createPdf_blue(ResumeModel newResumeModel,String action,BuildContext context) async {
+
+  Uint8List? dot0;
+  Uint8List? profile0;
+  Uint8List? email0;
+  Uint8List? www0;
+  Uint8List? location0;
+  Uint8List? phone0;
+  Uint8List? dotBlack;
 
   pw.TextStyle sText = const pw.TextStyle(color: PdfColors.white, fontSize: 10);
   pw.TextStyle sbText = pw.TextStyle(color: PdfColors.white, fontSize: 10,fontWeight: pw.FontWeight.bold);
@@ -46,40 +41,36 @@ Future<void> createPdf_blue(ResumeModel newResumeMdoel) async {
 
 
   final ByteData dot = await rootBundle.load('assets/images/dot.png');
-  _dot = dot.buffer.asUint8List();
+  dot0 = dot.buffer.asUint8List();
 
   final ByteData Bdot = await rootBundle.load('assets/images/dot_black.png');
-  _dot_black = Bdot.buffer.asUint8List();
+  dotBlack = Bdot.buffer.asUint8List();
 
   final ByteData profile = await rootBundle.load('assets/images/profile.png');
-  _profile = profile.buffer.asUint8List();
+  profile0 = profile.buffer.asUint8List();
 
   final ByteData www = await rootBundle.load('assets/images/www.png');
-  _www = www.buffer.asUint8List();
+  www0 = www.buffer.asUint8List();
 
   final ByteData phone = await rootBundle.load('assets/images/phone.png');
-  _phone = phone.buffer.asUint8List();
+  phone0 = phone.buffer.asUint8List();
 
   final ByteData location = await rootBundle.load('assets/images/location.png');
-  _location = location.buffer.asUint8List();
+  location0 = location.buffer.asUint8List();
 
   final ByteData email = await rootBundle.load('assets/images/email.png');
-  _email = email.buffer.asUint8List();
-
-  if (_dot == null || _profile == null) {
-    return;
-  }
+  email0 = email.buffer.asUint8List();
 
   final pdf = pw.Document();
 
-  final DotImage = pw.MemoryImage(_dot!);
-  final ProfileImage = pw.MemoryImage(_profile!);
+  final DotImage = pw.MemoryImage(dot0);
+  final ProfileImage = pw.MemoryImage(profile0);
 
-  final emailImage = pw.MemoryImage(_email!);
-  final phoneImage = pw.MemoryImage(_phone!);
-  final wwwImage = pw.MemoryImage(_www!);
-  final locationImage = pw.MemoryImage(_location!);
-  final Bdot2 = pw.MemoryImage(_dot_black!);
+  final emailImage = pw.MemoryImage(email0);
+  final phoneImage = pw.MemoryImage(phone0);
+  final wwwImage = pw.MemoryImage(www0);
+  final locationImage = pw.MemoryImage(location0);
+  final Bdot2 = pw.MemoryImage(dotBlack);
 
 
   const pageTheme = pw.PageTheme(
@@ -87,6 +78,55 @@ Future<void> createPdf_blue(ResumeModel newResumeMdoel) async {
     orientation: pw.PageOrientation.portrait,
     margin: pw.EdgeInsets.only(right: 10),
   );
+  pw.Widget buildReferencesGrid(pw.Context context, List<Reference> references) {
+    const int crossAxisCount = 2;
+    List<pw.Widget> rows = [];
+    List<pw.Widget> currentRow = [];
+
+    for (int i = 0; i < references.length; i++)
+    {
+      final reference = references[i];
+      currentRow.add(
+        pw.Container(
+          padding: const pw.EdgeInsets.all(8),
+          decoration: const pw.BoxDecoration(),
+          constraints: const pw.BoxConstraints(maxWidth: 150),
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(reference.name, style: const pw.TextStyle(fontSize: 12)),
+              pw.SizedBox(height: 5),
+              pw.Row(children:
+              [
+               pw.Container(constraints: const pw.BoxConstraints(maxWidth: 130),child:  pw.Text('${reference.company} / ${reference.position}',
+                   style: const pw.TextStyle(fontSize: 8,color: PdfColors.grey700)),)
+
+
+              ]),
+              pw.SizedBox(height: 5),
+              pw.Text('Phone: ${reference.phone}', style: const pw.TextStyle(fontSize: 8,color: PdfColors.grey700)),
+              pw.SizedBox(height: 5),
+              pw.Text('Email: ${reference.email}', style: const pw.TextStyle(fontSize: 8,color: PdfColors.grey700)),
+            ],
+          ),
+        ),
+      );
+
+      if ((i + 1) % crossAxisCount == 0 || i == references.length - 1) {
+        rows.add(
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: currentRow,
+          ),
+        );
+        currentRow = [];
+      }
+    }
+
+    return pw.Column(
+      children: rows,
+    );
+  }
 
 
   pdf.addPage(
@@ -95,31 +135,31 @@ Future<void> createPdf_blue(ResumeModel newResumeMdoel) async {
       build: (pw.Context context) {
 
         return[
-          pw.Container(child:
           pw.Partitions(children:
           [
             pw.Partition
               (
                 child:pw.Container(
-                  padding: pw.EdgeInsets.only(left: 20,top: 20,bottom: 20),
-                  margin: pw.EdgeInsets.only(right: 20),
+                  constraints: const pw.BoxConstraints(maxWidth:10 ),
+                  padding: const pw.EdgeInsets.only(left: 20,top: 20,bottom: 20),
+                  margin: const pw.EdgeInsets.only(right: 20),
                   height: 841,
-                  color: PdfColor.fromInt(0xFF163852),
-                  child: pw.Column(
+                  color: const PdfColor.fromInt(0xFF163852),
+                  child:pw.ConstrainedBox(child:  pw.Column(
                     mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Row(children:
                       [
-                        pw.Row(mainAxisAlignment: pw.MainAxisAlignment.center,children:
+                        pw.Row(children:
                         [pw.SizedBox(width: 40,),
                           pw.Center(
-                            child: newResumeMdoel.profile_image != null
+                            child: newResumeModel.profile_image != null
                                 ? pw.Container(
-                              padding: pw.EdgeInsets.all(5),
+                              padding: const pw.EdgeInsets.all(5),
                               decoration: pw.BoxDecoration(
                                 color: PdfColors.white,
-                                borderRadius: pw.BorderRadius.circular(65), // Adjusted for the outer container
+                                borderRadius: pw.BorderRadius.circular(65),
                               ),
                               width: 130,
                               height: 130,
@@ -130,16 +170,16 @@ Future<void> createPdf_blue(ResumeModel newResumeMdoel) async {
                                   child: pw.Center(
                                     child: pw.Image(
                                       pw.MemoryImage(
-                                        File(newResumeMdoel.profile_image!.path).readAsBytesSync(),
+                                        newResumeModel.profile_image!,
                                       ),
-                                      fit: pw.BoxFit.cover, // Ensure the image covers the oval
+                                      fit: pw.BoxFit.cover,
                                     ),
                                   ),
                                 ),
                               ),
                             )
                                 : pw.Container(
-                              padding: pw.EdgeInsets.all(5),
+                              padding: const pw.EdgeInsets.all(5),
                               decoration: pw.BoxDecoration(
                                 color: PdfColors.white,
                                 borderRadius: pw.BorderRadius.circular(65),
@@ -175,61 +215,68 @@ Future<void> createPdf_blue(ResumeModel newResumeMdoel) async {
                           width: 190,
                           height: 2,
                           color: PdfColors.white),
-                      pw.Row(children: [pw.Container(width: 14,height: 12,child:pw.Image(phoneImage,),),
-                        ///phone number
-                        pw.Text('  ${newResumeMdoel.contact!.phoneNumber}', style: sText),
+                      pw.Row(children: [
+                        pw.Container(width: 14,height: 12,child:pw.Image(phoneImage,),),
+                        pw.SizedBox(width: 5),
+                        pw.Text(newResumeModel.contact!.phoneNumber, style: sText),
                       ]),
                       pw.Row(children: [
                         pw.Container(width: 12,height: 10,child:pw.Image(emailImage,),),
-                        pw.Text('  ${newResumeMdoel.contact!.email}', style: sText),
+                       pw.SizedBox(width: 5),
+                       pw.Container(constraints: const pw.BoxConstraints(maxWidth: 200),child:  pw.Text(newResumeModel.contact!.email, style: sText),)
                       ]),
                       pw.Row(children: [
                         pw.Container(width: 14,height: 12,child:pw.Image(locationImage,),),
-                        pw.Text('  ${newResumeMdoel.contact!.address}', style: sText),
+                        pw.SizedBox(width: 5),
+                       pw.Container(constraints: const pw.BoxConstraints(maxWidth: 200),child:  pw.Text(newResumeModel.contact!.address, style: sText),)
                       ]),
                       pw.Row(children:
                       [pw.Container(width: 16,height: 14,child:pw.Image(wwwImage,),),
-                        pw.Text('  ${newResumeMdoel.contact!.website}', style: sText),
+                        pw.SizedBox(width: 5),
+                        pw.Container(constraints: const pw.BoxConstraints(maxWidth: 200),child: pw.Text(newResumeModel.contact!.website, style: sText),)
                       ]
                       ),
 
                       pw.SizedBox(height: 10),
-// Education
+          // Education
+                      if(newResumeModel.education.isNotEmpty)
                       pw.Text('Education', style: lText),
+                      if(newResumeModel.education.isNotEmpty)
                       pw.Container(
                         width: 190,
                         height: 2,
                         color: PdfColors.white,
                       ),
                       pw.ListView.builder(
-                        itemCount: newResumeMdoel.education.length,
+                        itemCount: newResumeModel.education.length,
                         itemBuilder: (context, index) {
-                          final item = newResumeMdoel.education[index];
+                          final item = newResumeModel.education[index];
                           return pw.Column(
                             crossAxisAlignment: pw.CrossAxisAlignment.start,
                             children: [
-                             pw.Row(children: [
-                               pw.Text('${item.from} ', style: sbText),
-                               pw.Text(' - ${item.to}', style: sbText),
-                             ]),
-                              pw.Text('  ${item.schoolTitle}', style: sbText),
+                              pw.Row(children: [
+                                pw.Text('${item.from} ', style: sbText),
+                                pw.Text(' - ${item.to}', style: sbText),
+                              ]),
+                              pw.SizedBox(height: 2),
+                              pw.Container(constraints: const pw.BoxConstraints(maxWidth: 200),child: pw.Text(item.schoolTitle, style: sbText),),
+                              pw.SizedBox(height: 5),
                               pw.Row(
+                                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                mainAxisAlignment:pw.MainAxisAlignment.start,
                                 children: [
-                                  pw.Container(
+                                  pw.Column(children: [pw.SizedBox(height: 4),pw.Container(
                                     width: 8,
                                     height: 6,
                                     child: pw.Image(DotImage),
-                                  ),
-                                  pw.Text('  ${item.major}', style: sText),
-                                ],
+                                  ),]),
+                                  pw.SizedBox(width: 5),
+                                 pw.Column(
+                                     children: [
+                                       pw.Container(constraints: const pw.BoxConstraints(maxWidth: 200),child:  pw.Text(item.major, style: sText),)
+                                 ]) ],
                               ),
 
-                                pw.Row(
-                                  children: [
-                                    //pw.Container(width: 8, height: 6, child: pw.Image(DotImage),),
-                                    //pw.Text(item., style: sText),
-                                  ],
-                                ),
                               pw.SizedBox(height: 10),  // Add spacing between items
                             ],
                           );
@@ -239,6 +286,7 @@ Future<void> createPdf_blue(ResumeModel newResumeMdoel) async {
                       pw.SizedBox(height: 10),
 
                       // Skills Heading
+                      if(newResumeModel.skills.isNotEmpty)
                       pw.Text('Skills', style: lText),
                       pw.Container(
                         width: 190,
@@ -246,20 +294,36 @@ Future<void> createPdf_blue(ResumeModel newResumeMdoel) async {
                         color: PdfColors.white,
                       ),
                       pw.ListView.builder(
-                        itemCount:newResumeMdoel.skills.length,
+                        itemCount:newResumeModel.skills.length,
                         itemBuilder: (context, index) {
 
-                          return pw.Row(
-                            children: [
-                              pw.Container(
-                                width: 8,
-                                height: 6,
-                                child: pw.Image(DotImage),
-                              ),
-                              pw.SizedBox(width: 5),
-                              pw.Text(newResumeMdoel.skills[index].skillName, style: sText),
-                            ],
-                          );
+                          return pw.Column(
+                              children: [
+                            pw.Row(
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              mainAxisAlignment:pw.MainAxisAlignment.start,
+                              children: [
+                                pw.Column(
+                                    children:
+                                [
+                                  pw.SizedBox(height: 4),
+                                  pw.Container(
+                                  width: 8,
+                                  height: 6,
+                                  child: pw.Image(DotImage),
+                                ),
+                                ]
+                                ),
+                                pw.SizedBox(width: 5),
+                               pw.Column(children: [ pw.Container(constraints: const pw.BoxConstraints(maxWidth: 200),child: pw.Text(
+                                 newResumeModel.skills[index].skillName,
+                                 style: sText,
+                               ),)])
+                              ],
+                            ),
+
+                            pw.SizedBox(height: 3,)
+                          ]);
                         },
                       ),
 
@@ -273,6 +337,7 @@ Future<void> createPdf_blue(ResumeModel newResumeMdoel) async {
                       // Languages heading /////////////////////////
 
 
+                      if(newResumeModel.languages.isNotEmpty)
                       pw.Text('Languages', style: lText),
                       pw.Container(
                         width: 190,
@@ -280,24 +345,53 @@ Future<void> createPdf_blue(ResumeModel newResumeMdoel) async {
                         color: PdfColors.white,
                       ),
                       pw.ListView.builder(
-                        itemCount: newResumeMdoel.languages.length,
+                        itemCount: newResumeModel.languages.length,
                         itemBuilder: (context, index) {
-                          return pw.Row(
-                            children: [
-                              pw.Container(
-                                width: 8,
-                                height: 6,
-                                child: pw.Image(DotImage),
-                              ),
-                              pw.SizedBox(width: 5),
-                              pw.Text(newResumeMdoel.languages[index].language, style: sText),
-                            ],
+                          return pw.Container(
+                            width: 200,  // The container's width
+                            child: pw.Column(
+
+                              children: [
+                                pw.Row(
+                                  mainAxisAlignment: pw.MainAxisAlignment.start,
+                                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                  children:
+                                  [
+                                    pw.Column(
+                                        children:
+                                        [   pw.SizedBox(height: 4),
+                                          pw.Container(
+                                      width: 8,
+                                      height: 6,
+                                      child: pw.Image(DotImage),
+                                      ),
+                                    ]
+                                    ),
+                                    pw.SizedBox(width: 5),
+                                   pw.Column(
+                                       children:
+                                   [
+                                     pw.Container
+                                       (
+                                     constraints: const pw.BoxConstraints(maxWidth: 200),
+                                     child: pw.Text(
+                                       newResumeModel.languages[index].language,
+                                       style: sText,
+                                     ),
+                                   ),])
+                                  ],
+                                ),
+                                pw.SizedBox(height: 3),
+                              ],
+                            ),
                           );
                         },
-                      ),
+                      )
+
 
                     ],
-                  ),
+                  ), constraints: const pw.BoxConstraints(maxWidth: 10)
+                  )
                 )
             ),
 
@@ -309,27 +403,27 @@ Future<void> createPdf_blue(ResumeModel newResumeMdoel) async {
             pw.Partition(child:
             pw.Container(
               width: 400,
-              //margin: const pw.EdgeInsets.all(20),
-              //padding: pw.EdgeInsets.only(right: 20),
+
               color: PdfColors.white,
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
-                //mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
                 children: [
                   pw.Container(
                       child: pw.Container(
-                        margin: pw.EdgeInsets.only(left: 25),
+                        margin: const pw.EdgeInsets.only(left: 25),
                         child: pw.Column(
                           mainAxisAlignment: pw.MainAxisAlignment.start,
                           children: [
                             pw.SizedBox(height: 40),
                             pw.Row(children: [
-                              pw.Text(newResumeMdoel.intro!.firstName, style: pw.TextStyle(fontSize: 26,color: PdfColors.grey800,fontWeight: pw.FontWeight.bold)),
+                              pw.Container(constraints: const pw.BoxConstraints(maxWidth: 100),  child: pw.Text(newResumeModel.intro!.firstName,style: pw.TextStyle(fontSize: 26,color: PdfColors.grey800,fontWeight: pw.FontWeight.bold)),
+                              ),
                               pw.SizedBox(width: 5),
-                              pw.Text(newResumeMdoel.intro!.lastName, style: const pw.TextStyle(fontSize: 26,color: PdfColor.fromInt(0xFF163852))),
-                            ]),
+                              pw.Container(constraints: const pw.BoxConstraints(maxWidth: 110),child: pw.Text(newResumeModel.intro!.lastName, style: const pw.TextStyle(fontSize: 26,color: PdfColor.fromInt(0xFF163852))),
+                              )
+                               ]),
                             pw.Row(children: [
-                              pw.Text(newResumeMdoel.job, style: const pw.TextStyle(fontSize: 12,color: PdfColors.grey600)),
+                             pw.Container(constraints: const pw.BoxConstraints(maxWidth: 250),child:  pw.Text(newResumeModel.job, style: const pw.TextStyle(fontSize: 12,color: PdfColors.grey600)),),
                             ]),
                             pw.Row(children: [
                               pw.Container(
@@ -354,18 +448,19 @@ Future<void> createPdf_blue(ResumeModel newResumeMdoel) async {
                   pw.Container(
                       margin: const pw.EdgeInsets.symmetric(vertical: 10,horizontal: 0),
                       constraints: const pw.BoxConstraints(maxWidth: 280),
-                      child: pw.Flexible(child: pw.Text(newResumeMdoel.intro!.summary,
+                      child: pw.Text(newResumeModel.intro!.summary,
                         style: b2Text,
-                      ),
                       )
                   ),
 
-//////// Work Experience/////////////////////////////////////
+          //////// Work Experience/////////////////////////////////////
+                  if(newResumeModel.experience.isNotEmpty)
                   pw.Row(children:
                   [
                     pw.Text('Work Experience', style: rlText)
                   ]
                   ),
+                  if(newResumeModel.experience.isNotEmpty)
                   pw.Container
                     (
                       width: 315,
@@ -374,22 +469,33 @@ Future<void> createPdf_blue(ResumeModel newResumeMdoel) async {
                   ),
                   pw.SizedBox(height:10),
 
-////Work Experience/////////
                   pw.Container(
-                      margin: pw.EdgeInsets.only(right: 20),
-                      constraints: pw.BoxConstraints(maxWidth: 215),
+                      margin: const pw.EdgeInsets.only(right: 20),
+                      padding: const pw.EdgeInsets.only(top: 20),
+                      constraints: const pw.BoxConstraints(maxWidth: 215),
                       child: pw.ListView.builder(
-                        itemCount: newResumeMdoel.experience.length,
-                        itemBuilder: (context, index) {
-                          final item = newResumeMdoel.experience[index];
+                        itemCount: newResumeModel.experience.length,
+                        itemBuilder: (context, index)
+                        {
+                          final item = newResumeModel.experience[index];
                           int baseHeight = 50;
-                          double descriptionLines = newResumeMdoel.experience
-                              .where((desc) => desc.company == item.company).length * 2.8;
+
+                          List<String> lines = item.description.split('\n');
+
+                          if (lines.isNotEmpty && lines.first.isEmpty) {
+                            lines.removeAt(0);
+                          }
+                          if (lines.isNotEmpty && lines.last.isEmpty) {
+                            lines.removeLast();
+                          }
+
+                          double descriptionLines = lines.length * 1.5;
                           int descrip = descriptionLines.toInt();
 
-                          double lineHeight = (baseHeight + (descrip) * 10);
+                          double lineHeight = baseHeight + (descrip * 10);
                           print('$lineHeight');
-                          int linescount =0;
+
+
                           return pw.Container(
 
 
@@ -401,11 +507,11 @@ Future<void> createPdf_blue(ResumeModel newResumeMdoel) async {
                                   children: [
                                     pw.Container(
                                         padding: const pw.EdgeInsets.all(0),
-                                        margin: pw.EdgeInsets.all(0),
+                                        margin: const pw.EdgeInsets.all(0),
                                         width: 6,
                                         height: 6,
 
-                                        decoration: pw.BoxDecoration(color: PdfColors.black,shape: pw.BoxShape.circle)
+                                        decoration: const pw.BoxDecoration(color: PdfColors.black,shape: pw.BoxShape.circle)
                                     ),
                                     pw.Container(
                                       margin: const pw.EdgeInsets.all(0),
@@ -418,8 +524,8 @@ Future<void> createPdf_blue(ResumeModel newResumeMdoel) async {
                                 ),
                                 pw.SizedBox(width: 6),
                                 pw.Container(
-                                  margin: pw.EdgeInsets.only(left: 5),
-                                  padding: pw.EdgeInsets.only(top: -15),
+                                  margin: const pw.EdgeInsets.only(left: 5),
+                                  padding: const pw.EdgeInsets.only(top: -15),
                                   child: pw.Column(
                                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                                     mainAxisAlignment: pw.MainAxisAlignment.start,
@@ -427,9 +533,9 @@ Future<void> createPdf_blue(ResumeModel newResumeMdoel) async {
                                       pw.Row(
                                         mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
                                         children: [
-                                          pw.Text(item.company, style: bText),
-                                          pw.SizedBox(width: 100),
-                                          pw.Text('${item.from} - ${item.to}', style: b2Text),
+                                          pw.Container(constraints: const pw.BoxConstraints(maxWidth: 180),child: pw.Text(item.company, style: bText),),
+
+                                          pw.Text('   ${item.from} - ${item.to}', style: b2Text),
                                         ],
                                       ),
 
@@ -437,46 +543,50 @@ Future<void> createPdf_blue(ResumeModel newResumeMdoel) async {
                                         mainAxisAlignment: pw.MainAxisAlignment.start,
                                         children: [
                                           pw.Container(
+                                            constraints: const pw.BoxConstraints(maxWidth: 280),
                                             child: pw.Text(item.position, style: b2Text, textAlign: pw.TextAlign.left),
                                           ),
                                         ],
                                       ),
                                       pw.SizedBox(height: 10),
                                       pw.Container(
-
-                                        child: pw.ListView.builder(
-                                          itemCount: newResumeMdoel.experience.length,
-                                          itemBuilder: (context, index) {
-                                            final item=newResumeMdoel.experience[index];
-                                             return pw.Row(
-                                                mainAxisAlignment: pw.MainAxisAlignment.start,
-                                                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                                                children:
-                                                [
-                                                  pw.Column(children: [
-                                                    pw.SizedBox(height: 5),
-                                                    pw.Container(
-                                                      width: 4,
-                                                      height: 8,
-                                                      child: pw.Image(Bdot2),
+                                        constraints: const pw.BoxConstraints(maxWidth: 260),
+                                        child: pw.Flexible(
+                                          child: pw.Column(
+                                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                            children: item.description.split('\n').where((line) => line.isNotEmpty).map((line) {
+                                              return pw.Padding(
+                                                padding: const pw.EdgeInsets.only(bottom: 4),
+                                                child: pw.Row(
+                                                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                                  children: [
+                                                    pw.Column(
+                                                      children: [
+                                                        pw.SizedBox(height: 5),
+                                                        pw.Container(
+                                                          alignment: pw.Alignment.topLeft,
+                                                          width: 4,
+                                                          height: 8,
+                                                          child: pw.Image(Bdot2),
+                                                        ),
+                                                      ],
                                                     ),
-                                                  ]
-                                                  ),
-                                                  pw.SizedBox(width: 5,height: 0),
-                                                  pw.Container(
-                                                      constraints: pw.BoxConstraints(maxWidth: 260),
-                                                      child: pw.Flexible(child: pw.Text(
-                                                        item.description,
+                                                    pw.SizedBox(width: 5),
+                                                    pw.Expanded(
+                                                      child: pw.Text(
+                                                        line,
                                                         style: b2Text,
-                                                      ),)
-                                                  ),
-
-                                                ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
                                               );
+                                            }).toList(),
+                                          )
 
-                                          },
                                         ),
                                       ),
+
                                       pw.SizedBox(height: 8),
 
 
@@ -493,34 +603,21 @@ Future<void> createPdf_blue(ResumeModel newResumeMdoel) async {
                   pw.SizedBox(height:20),
 
 
-// Reference
+          // Reference
+                  if(newResumeModel.refrences.isNotEmpty)
                   pw.Row(children:
                   [
-                    pw.Text('Certifications', style: rlText)
+                    pw.Text('Refrences', style: rlText)
                   ]),
+                  if(newResumeModel.refrences.isNotEmpty)
                   pw.Container(
                       width: 315,
                       height: 2,
                       color: const PdfColor.fromInt(0xFF163852)
                   ),
                   pw.SizedBox(height:  10),
-                  pw.ListView.builder(
-                    itemCount: newResumeMdoel.certifications.length,
-                    itemBuilder: (context, index) {
-                      final item=newResumeMdoel.certifications[index];
-                      return pw.Row(
-                        children: [
-                          pw.Container(
-                            width: 8,
-                            height: 6,
-                            child: pw.Image(Bdot2),
-                          ),
-                          pw.SizedBox(width: 5),
-                          pw.Text(item.certificationName, style: b2Text),
-                        ],
-                      );
-                    },
-                  ),
+                  buildReferencesGrid(context, newResumeModel.refrences)
+
 
 
                 ],
@@ -529,7 +626,6 @@ Future<void> createPdf_blue(ResumeModel newResumeMdoel) async {
             )
 
           ]
-          )
           )];
       },
     ),
@@ -537,11 +633,62 @@ Future<void> createPdf_blue(ResumeModel newResumeMdoel) async {
 
 
 
+  final pdfData = await pdf.save();
 
   final output = await getTemporaryDirectory();
-  final file = File("${output.path}/example.pdf");
-  await file.writeAsBytes(await pdf.save());
-  await OpenFile.open(file.path);
+  final file = File("${output.path}/Resume.pdf");
+  newResumeModel.resume = file;
+
+  if (action == 'save')
+  {
+
+  }
+  else if (action == 'preview')
+  {
+
+
+
+    await file.writeAsBytes(pdfData);
+    final pdfDoc = await pdfx.PdfDocument.openFile(file.path);
+    final page = await pdfDoc.getPage(1);
+
+    final pdfPageImage = await page.render(
+      width: page.width,
+      height: page.height,
+      format: pdfx.PdfPageImageFormat.png,
+    );
+
+
+    final img.Image? image = img.decodeImage(pdfPageImage!.bytes);
+    if (image != null)
+    {
+      final Uint8List uint8list = Uint8List.fromList(img.encodePng(image));
+      final resumeViewModel = Provider.of<ResumeViewModelProvider>(context, listen: false);
+      resumeViewModel.setResumeSnapshot(uint8list,newResumeModel);
+
+
+      await page.close();
+      await pdfDoc.close();
+      Navigator.pop(context);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Template_Preview(
+            resumeModel: newResumeModel,
+          ),
+        ),
+      );
+    } else {
+      print('Failed to decode image.');
+    }
+  }
+
+
+  else
+  {
+    throw ArgumentError('Invalid action: $action');
+  }
+
 }
 
 

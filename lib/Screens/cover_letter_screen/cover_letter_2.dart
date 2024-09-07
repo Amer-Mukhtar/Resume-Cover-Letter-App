@@ -1,7 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 import '../../Models/model_cover.dart';
+import '../../Utility/widgets/Textfield.dart';
+import '../../Utility/widgets/TextfieldSummary.dart';
+import 'cover_viewmode.dart';
 
 Color text = Colors.white;
 List photo = [
@@ -11,7 +15,7 @@ List photo = [
 
 class CoverLetter extends StatefulWidget
 {
-  final newCoverLetterModel coverLetterModel;
+  final CoverLetterModel coverLetterModel;
 
   const CoverLetter({super.key, required this.coverLetterModel});
 
@@ -30,6 +34,8 @@ class _CoverLetterState extends State<CoverLetter> with SingleTickerProviderStat
   late TextEditingController textControllerPhone;
   late TextEditingController textControllerAddress;
 
+
+
   @override
   void initState() {
     super.initState();
@@ -42,7 +48,12 @@ class _CoverLetterState extends State<CoverLetter> with SingleTickerProviderStat
     textControllerPhone = TextEditingController(text: widget.coverLetterModel.phoneNumber);
     textControllerAddress = TextEditingController(text: widget.coverLetterModel.address);
 
-    textControllerLettermsg.addListener(() => widget.coverLetterModel.summary = textControllerLettermsg.text);
+    textControllerLettermsg.addListener((){
+      widget.coverLetterModel.summary = textControllerLettermsg.text;
+      final CoverViewM = Provider.of<CoverViewModelProvider>(context, listen: false);
+      CoverViewM.SetSummary(widget.coverLetterModel,textControllerLettermsg.text);
+
+    });
     textControllerFirstName.addListener(() => widget.coverLetterModel.firstName = textControllerFirstName.text);
     textControllerLastName.addListener(() => widget.coverLetterModel.lastName = textControllerLastName.text);
     textControllerEmail.addListener(() => widget.coverLetterModel.email = textControllerEmail.text);
@@ -188,45 +199,28 @@ class _CoverLetterState extends State<CoverLetter> with SingleTickerProviderStat
               ),
               Expanded(
                 child: TabBarView(
-
                   controller: _tabController,
-                  children: [
-                    // Letter Message Tab
+                  children:
+                  [
+                    //messaging
                     Scaffold(
                       backgroundColor: Colors.black,
-                      body: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              margin: const EdgeInsets.all(20),
-                              padding: const EdgeInsets.all(10),
-                              height: 180,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: Colors.white60, width: 1),
-                              ),
-                              child: Theme(
-                                data: ThemeData.dark(),
-                                child: TextField(
-                                  expands: true,
-                                  maxLines: null,
-                                  minLines: null,
-                                  keyboardType: TextInputType.multiline,
-                                  controller: textControllerLettermsg,
-                                  decoration: const InputDecoration(
-                                    hintStyle: TextStyle(color: Colors.white54),
-                                    hintText: 'Type Your letter message',
-                                    contentPadding: EdgeInsets.all(10.0),
-                                    border: InputBorder.none,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          )
-                        ],
+                      body: Container(
+                        margin: const EdgeInsets.only(top: 20, bottom: 20),
+                        child: SingleChildScrollView(
+                          child: CustomSummaryField(
+                            height: MediaQuery.of(context).size.height /1.7,
+                            labelText: 'Summary',
+                            controller: textControllerLettermsg,
+                            hintText: 'Type Your letter message',
+                            onChanged: (value) {
+                              // Your onChanged logic here
+                            }, borderColor: Colors.grey,
+                          ),
+                        ),
                       ),
                     ),
+
                     // Intro Tab
                     Scaffold(
                       backgroundColor: Colors.black,
@@ -237,124 +231,63 @@ class _CoverLetterState extends State<CoverLetter> with SingleTickerProviderStat
                             children: [
                               const SizedBox(height: 20),
                               // First Name
-                              Container(margin: const EdgeInsets.only(left: 20,right: 20,top: 10),child: Text('First Name',style: TextStyle(color: text,fontWeight: FontWeight.bold),)),
-                              Theme(
-                                data: ThemeData.dark(),
-                                child: Container(
-                                  margin: const EdgeInsets.only(left: 20,right: 20,top: 10,bottom: 20),
-                                  height: 50,
-                                  width:double.infinity ,
-                                  child: TextFormField(
-
-                                    controller: textControllerFirstName,
-                                    decoration: const InputDecoration(
-                                      labelText: 'William',
-                                      focusedBorder:OutlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.white)
-
-                                      ) ,
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    cursorColor: Colors.white,
-                                  ),
-                                ),
+                              CustomTextField(
+                                labelText: 'First Name',
+                                KeyboardType: TextInputType.text,
+                                controller: textControllerFirstName,
+                                hintText: 'William',
+                                onChanged: (value) {
+                                },
                               ),
+
 
                               // Last Name
-                              Container(margin: const EdgeInsets.only(left: 20,right: 20,top: 10),child: Text('Last Name',style: TextStyle(color: text,fontWeight: FontWeight.bold),)),
-                              Theme(
-                                data: ThemeData.dark(),
-                                child: Container(
-                                  margin: const EdgeInsets.only(left: 20,right: 20,top: 10,bottom: 20),
-                                  height: 50,
-                                  width:double.infinity ,
-                                  child: TextFormField(
+                              CustomTextField(
+                                labelText: 'Last Name',
+                                KeyboardType: TextInputType.text,
+                                controller: textControllerLastName,
+                                hintText: 'Smith',
+                                onChanged: (value) {
 
-                                    controller: textControllerLastName,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Smith',
-                                      focusedBorder:OutlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.white)
-
-                                      ) ,
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    cursorColor: Colors.white,
-                                  ),
-                                ),
+                                },
                               ),
+
 
                               // Email
-                              Container(margin: const EdgeInsets.only(left: 20,right: 20,top: 10),child: Text('Email',style: TextStyle(color: text,fontWeight: FontWeight.bold),)),
-                              Theme(
-                                data: ThemeData.dark(),
-                                child: Container(
-                                  margin: const EdgeInsets.only(left: 20,right: 20,top: 10,bottom: 20),
-                                  height: 50,
-                                  width:double.infinity ,
-                                  child: TextFormField(
+                              CustomTextField(
+                                labelText: 'Email',
+                                KeyboardType: TextInputType.emailAddress,
+                                controller: textControllerEmail,
+                                hintText: 'Vitaklik@gmail.com',
+                                onChanged: (value) {
 
-                                    controller: textControllerEmail,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Vitaklik@gmail.com',
-                                      focusedBorder:OutlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.white)
-
-                                      ) ,
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    cursorColor: Colors.white,
-                                  ),
-                                ),
+                                },
                               ),
+
 
                               // Phone Number
-                              Container(margin: const EdgeInsets.only(left: 20,right: 20,top: 10),child: Text('Phone Number',style: TextStyle(color: text,fontWeight: FontWeight.bold),)),
-                              Theme(
-                                data: ThemeData.dark(),
-                                child: Container(
-                                  margin: const EdgeInsets.only(left: 20,right: 20,top: 10,bottom: 20),
-                                  height: 50,
-                                  width:double.infinity ,
-                                  child: TextFormField(
+                              CustomTextField(
+                                labelText: 'Phone Number',
+                                KeyboardType: TextInputType.phone,
+                                controller: textControllerPhone,
+                                hintText: '+43 983 7459 3495',
+                                onChanged: (value) {
 
-                                    controller: textControllerPhone,
-                                    decoration: const InputDecoration(
-                                      labelText: '1749 2347 8932',
-                                      focusedBorder:OutlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.white)
-
-                                      ) ,
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    cursorColor: Colors.white,
-                                  ),
-                                ),
+                                },
                               ),
+
 
                               // Address
-                              Container(margin: const EdgeInsets.only(left: 20,right: 20,top: 10),child: Text('Address',style: TextStyle(color: text,fontWeight: FontWeight.bold),)),
-                              Theme(
-                                data: ThemeData.dark(),
-                                child: Container(
-                                  margin: const EdgeInsets.only(left: 20,right: 20,top: 10,bottom: 20),
-                                  height: 50,
-                                  width:double.infinity ,
-                                  child: TextFormField(
+                              CustomTextField(
+                                labelText: 'Address',
+                                KeyboardType: TextInputType.text,
+                                controller: textControllerAddress,
+                                hintText: 'Los Angeles ,USA',
+                                onChanged: (value) {
 
-                                    controller: textControllerAddress,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Los Angeles ,USA',
-                                      focusedBorder:OutlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.white)
-
-                                      ) ,
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    cursorColor: Colors.white,
-                                  ),
-                                ),
+                                },
                               ),
+
 
                             ],
                           ),

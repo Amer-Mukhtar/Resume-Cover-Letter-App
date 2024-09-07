@@ -1,45 +1,83 @@
 import 'dart:io';
 
-class ResumeModel {
+import 'package:flutter/services.dart';
+import 'package:hive/hive.dart';
+
+@HiveType(typeId: 0)
+class ResumeModel extends HiveObject {
+  @HiveField(0)
   String title;
+
+  @HiveField(1)
   String job;
-  File ?profile_image;
+
+  @HiveField(2)
+  Uint8List? profile_image;
+
+  @HiveField(3)
   Intro? intro;
+
+  @HiveField(4)
   double? fullness;
+
+  @HiveField(5)
   Contact? contact;
+
+  @HiveField(6)
   List<Education> education;
+
+  @HiveField(7)
   List<Experience> experience;
+
+  @HiveField(8)
   List<Description> descriptions;
+
+  @HiveField(9)
   List<Skill> skills;
+
+  @HiveField(10)
   List<Language> languages;
+
+  @HiveField(11)
   List<Certification> certifications;
 
+  @HiveField(12)
+  List<Reference> refrences;
 
-  ResumeModel(
-      {
+  @HiveField(13)
+  File? resume;
+
+  @HiveField(14)
+  Uint8List? resume_snapshot;
+
+  ResumeModel({
     required this.title,
-        required this.job,
-       this.profile_image,
-        this.fullness,
+    required this.job,
+    this.profile_image,
+    this.resume_snapshot,
+    this.resume,
     this.intro,
+    this.fullness,
     this.contact,
-    List<Education>? education,
-    List<Experience>? experience,
-    List<Description>? descriptions,
-    List<Skill>? skills,
-    List<Language>? languages,
-    List<Certification>? certifications,
-  })  : education = education ?? [],
-        experience = experience ?? [],
-        descriptions = descriptions ?? [],
-        skills = skills ?? [],
-        languages = languages ?? [],
-        certifications = certifications ?? [];
+    this.education = const [],
+    this.experience = const [],
+    this.descriptions = const [],
+    this.skills = const [],
+    this.languages = const [],
+    this.certifications = const [],
+    this.refrences = const [],
+  });
 }
 
-class Intro {
+@HiveType(typeId: 1)
+class Intro extends HiveObject {
+  @HiveField(0)
   String firstName;
+
+  @HiveField(1)
   String lastName;
+
+  @HiveField(2)
   String summary;
 
   Intro({
@@ -49,10 +87,18 @@ class Intro {
   });
 }
 
-class Contact {
+@HiveType(typeId: 2)
+class Contact extends HiveObject {
+  @HiveField(0)
   String email;
+
+  @HiveField(1)
   String phoneNumber;
+
+  @HiveField(2)
   String website;
+
+  @HiveField(3)
   String address;
 
   Contact({
@@ -63,10 +109,18 @@ class Contact {
   });
 }
 
-class Education {
+@HiveType(typeId: 3)
+class Education extends HiveObject {
+  @HiveField(0)
   String schoolTitle;
+
+  @HiveField(1)
   String major;
+
+  @HiveField(2)
   String from;
+
+  @HiveField(3)
   String to;
 
   Education({
@@ -77,12 +131,24 @@ class Education {
   });
 }
 
-class Experience {
+@HiveType(typeId: 4)
+class Experience extends HiveObject {
+  @HiveField(0)
   String company;
+
+  @HiveField(1)
   String position;
+
+  @HiveField(2)
   String location;
+
+  @HiveField(3)
   String from;
+
+  @HiveField(4)
   String to;
+
+  @HiveField(5)
   String description;
 
   Experience({
@@ -95,7 +161,9 @@ class Experience {
   });
 }
 
-class Description {
+@HiveType(typeId: 5)
+class Description extends HiveObject {
+  @HiveField(0)
   String certificationTitle;
 
   Description({
@@ -103,16 +171,26 @@ class Description {
   });
 }
 
-class Skill {
+@HiveType(typeId: 6)
+class Skill extends HiveObject {
+  @HiveField(0)
   String skillName;
+
+  @HiveField(1)
+  String level;
 
   Skill({
     required this.skillName,
+    required this.level,
   });
 }
 
-class Language {
+@HiveType(typeId: 7)
+class Language extends HiveObject {
+  @HiveField(0)
   String language;
+
+  @HiveField(1)
   String level;
 
   Language({
@@ -121,10 +199,38 @@ class Language {
   });
 }
 
-class Certification {
+@HiveType(typeId: 8)
+class Certification extends HiveObject {
+  @HiveField(0)
   String certificationName;
 
   Certification({
     required this.certificationName,
+  });
+}
+
+@HiveType(typeId: 9)
+class Reference extends HiveObject {
+  @HiveField(0)
+  String name;
+
+  @HiveField(1)
+  String company;
+
+  @HiveField(2)
+  String position;
+
+  @HiveField(3)
+  String phone;
+
+  @HiveField(4)
+  String email;
+
+  Reference({
+    required this.name,
+    required this.position,
+    required this.company,
+    required this.email,
+    required this.phone,
   });
 }
