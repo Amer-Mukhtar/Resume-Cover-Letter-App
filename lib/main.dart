@@ -5,7 +5,8 @@ import 'package:provider/provider.dart';
 
 import 'Models/model_resume.dart';
 import 'Screens/Home_Screen/home_screen.dart';
-import 'Screens/add_resume_screen/adapters.dart';
+import 'Screens/add_resume_screen/resume_2.dart';
+import 'Utility/Adapters/ResumeAdapters.dart';
 import 'Screens/add_resume_screen/resume_view_model.dart';
 
 import 'Screens/cover_letter_screen/cover_viewmode.dart'; // Import additional view model
@@ -35,10 +36,13 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (context) => ResumeViewModelProvider(resumeBox: resumeBox), // Pass the opened Hive box
+          create: (context) => ResumeViewModelProvider(resumeBox: resumeBox),
         ),
         ChangeNotifierProvider(
-          create: (context) => CoverViewModelProvider(), // Add the new provider here
+          create: (context) => CoverViewModelProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => ResumeState(),
         ),
       ],
       child: const MaterialApp(

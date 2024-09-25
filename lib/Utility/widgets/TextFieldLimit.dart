@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-class CustomTextFieldValidate extends StatelessWidget {
+class CustomTextFieldValidateLimit extends StatelessWidget {
   final String labelText;
   final TextEditingController controller;
   final String hintText;
@@ -8,11 +9,11 @@ class CustomTextFieldValidate extends StatelessWidget {
   final EdgeInsets margin;
   final TextInputType keyboardType;
   final String? Function(String?)? validator;
-  final List? inputFormatter;
+  final List<TextInputFormatter> inputFormatter;
   final bool? enable;
 
 
-  const CustomTextFieldValidate({
+  const CustomTextFieldValidateLimit({
     Key? key,
     required this.labelText,
     required this.controller,
@@ -21,7 +22,7 @@ class CustomTextFieldValidate extends StatelessWidget {
     required this.onChanged,
     this.margin = const EdgeInsets.only(left: 5, right: 0, top: 0),
     required this.keyboardType,
-    this.validator, this.inputFormatter, // Add validator parameter
+    this.validator, required this.inputFormatter, // Add validator parameter
   }) : super(key: key);
 
   @override
@@ -52,7 +53,7 @@ class CustomTextFieldValidate extends StatelessWidget {
               onChanged: onChanged,
               keyboardType: keyboardType,
               validator: validator,
-
+inputFormatters: inputFormatter,
               decoration: InputDecoration(
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey),

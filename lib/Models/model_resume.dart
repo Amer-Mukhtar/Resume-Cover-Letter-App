@@ -177,7 +177,7 @@ class Skill extends HiveObject {
   String skillName;
 
   @HiveField(1)
-  String level;
+  double level;
 
   Skill({
     required this.skillName,
