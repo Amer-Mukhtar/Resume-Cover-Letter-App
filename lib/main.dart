@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 
 import 'Models/model_resume.dart';
+import 'Screens/Gpt/gpt.dart';
 import 'Screens/Home_Screen/home_screen.dart';
 import 'Screens/add_resume_screen/resume_2.dart';
 import 'Utility/Adapters/ResumeAdapters.dart';
@@ -14,9 +16,9 @@ import 'Screens/cover_letter_screen/cover_viewmode.dart'; // Import additional v
 
 
 void main() async {
+  Gemini.init(apiKey: gemini);
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Hive
   await Hive.initFlutter();
 
   Hive.registerAdapter(ResumeModelAdapter());
@@ -29,7 +31,6 @@ void main() async {
   Hive.registerAdapter(CertificationAdapter());
   Hive.registerAdapter(ReferenceAdapter());
 
-  // Open the box for resumes
   var resumeBox = await Hive.openBox<ResumeModel>('resumes');
 
   runApp(

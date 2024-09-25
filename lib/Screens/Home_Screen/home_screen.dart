@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../Gpt/gpt.dart';
 import '../add_resume_screen/resume_1.dart';
 import '../cover_letter_screen/cover_letter_1.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -276,6 +277,21 @@ class _HomeState extends State<Home> {
           ),
         ),
         actions: [
+          GestureDetector(
+            onTap: (){Navigator.push(context, MaterialPageRoute(builder: (context)=>Chat()));},
+            child: Padding(
+              padding: const EdgeInsets.only(left: 10, top: 0),
+              child: Container(
+                height: 40,
+                width: 40,
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white60),
+                    borderRadius: BorderRadius.circular(10)),
+                child: Padding(padding: EdgeInsets.all(5),child: Image.asset('assets/icons/gemini2.png',scale: 0.1,)),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
           GestureDetector(
             onTap: () {
              setState(() {
