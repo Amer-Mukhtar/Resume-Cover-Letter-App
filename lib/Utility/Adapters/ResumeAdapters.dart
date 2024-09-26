@@ -27,6 +27,7 @@ class ResumeModelAdapter extends TypeAdapter<ResumeModel> {
       refrences: reader.readList().cast<Reference>(),
       resume: reader.read() as File?,
       resume_snapshot: reader.read(),
+      achievements: reader.readList().cast<Achievements>(),
     );
   }
 
@@ -48,6 +49,7 @@ class ResumeModelAdapter extends TypeAdapter<ResumeModel> {
     writer.writeList(obj.refrences);
     writer.write(obj.resume); // Handle file path or representation
     writer.write(obj.resume_snapshot);
+    writer.writeList(obj.achievements);
   }
 }
 
@@ -218,5 +220,24 @@ class ReferenceAdapter extends TypeAdapter<Reference> {
     writer.writeString(obj.position);
     writer.writeString(obj.phone);
     writer.writeString(obj.email);
+  }
+}
+
+class AchievementsAdapter extends TypeAdapter<Achievements> {
+  @override
+  final typeId = 9;
+
+  @override
+  Achievements read(BinaryReader reader) {
+    return Achievements(
+      name: reader.readString(),
+      Descirption: reader.readString(),
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, Achievements obj) {
+    writer.writeString(obj.name);
+    writer.writeString(obj.Descirption);
   }
 }

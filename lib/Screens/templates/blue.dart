@@ -640,7 +640,7 @@ Future<void> createPdf_blue(ResumeModel newResumeModel,String action,BuildContex
   final output = await getTemporaryDirectory();
   final file = File("${output.path}/Resume.pdf");
   newResumeModel.resume = file;
-  await OpenFile.open("${output.path}/Resume.pdf");
+  //await OpenFile.open("${output.path}/Resume.pdf");
   if (action == 'save')
   {
 

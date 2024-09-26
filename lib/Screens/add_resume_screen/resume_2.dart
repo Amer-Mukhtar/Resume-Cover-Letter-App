@@ -9,6 +9,7 @@ import 'package:resume_maker/Models/model_resume.dart';
 import 'package:resume_maker/Screens/add_resume_screen/resume_sections/Certification.dart';
 import 'package:resume_maker/Screens/add_resume_screen/resume_sections/Experience.dart';
 import 'package:resume_maker/Screens/add_resume_screen/resume_sections/Intro.dart';
+import 'package:resume_maker/Screens/add_resume_screen/resume_sections/KeyAchievements.dart';
 import 'package:resume_maker/Screens/add_resume_screen/resume_sections/Languages.dart';
 import 'package:resume_maker/Screens/add_resume_screen/resume_sections/Refrences.dart';
 import 'package:resume_maker/Screens/add_resume_screen/resume_sections/Skill%20Highlight.dart';
@@ -65,7 +66,7 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 9, vsync: this);
+    _tabController = TabController(length: 10, vsync: this);
  }
 
  late final ResumeViewModelProvider view;
@@ -156,7 +157,7 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                     vertical: 15),
               ),
               onPressed: () {
-                _tabController.animateTo((_tabController.index + 1) % 9);
+                _tabController.animateTo((_tabController.index + 1) % 10);
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -192,7 +193,7 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
             backgroundColor: Colors.black,
             body: Container(
               child: DefaultTabController(
-                length: 9,
+                length: 10,
                 child: Column(children:
                 [
                   TabBar(
@@ -283,6 +284,16 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                             ],),
                           ),
                         ),////Languages
+
+                        Tab(
+                          child: Container(
+                            child: const Row(children: [
+                              Icon( FontAwesomeIcons.trophy,size: 20,),
+                              SizedBox(width: 10,),
+                              Text('Key Achievements')
+                            ],),
+                          ),
+                        ),
                         Tab(
                           child: Container(
                             child: const Row(children: [
@@ -291,7 +302,8 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                               Text('Templates')
                             ],),
                           ),
-                        ),//Templates
+                        ),
+
           
           
                       ]
@@ -324,7 +336,10 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
           
                         //references
                         RefrencesScreen(newResumeMdoel: widget.newResumeMdoel, index: widget.index,borderColorContact:  resumeState.borderColorContact),
-          
+
+                        //key achievements
+                        KeyAchievementsScreen(newResumeMdoel: widget.newResumeMdoel,index: widget.index, borderColorContact:  resumeState.borderColorContact),
+
                         ///template
                         Scaffold(
                           body: Container(
@@ -437,7 +452,6 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
                               },
                             ),
                           ),
-          
                         )
                       ]
                   ),

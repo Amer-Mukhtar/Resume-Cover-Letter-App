@@ -637,7 +637,6 @@ Future createPdf_B_W(ResumeModel resumeModel, String action,BuildContext context
   {
 
 
-
     await file.writeAsBytes(pdfData);
     final pdfDoc = await pdfx.PdfDocument.openFile(file.path);
     final page = await pdfDoc.getPage(1);

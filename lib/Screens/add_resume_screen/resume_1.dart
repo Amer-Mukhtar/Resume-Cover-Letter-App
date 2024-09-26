@@ -124,7 +124,8 @@ class _Resume_ListState extends State<Resume_List> {
                                 color: Colors.white24,
                                 width:1,
 
-                              ),),
+                              ),
+                            ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [

@@ -92,88 +92,116 @@ class _CoverState extends State<Cover> {
         shrinkWrap: true,
         itemCount: _viewModel.coverLetters.length,
         itemBuilder: (context, index) {
+
           final item = _viewModel.coverLetters[index];
+
           return GestureDetector(
             onTap: () {
               _showCoverLetterOptions(context, index, _viewModel);
             },
             child: Container(
-              color: Colors.black,
-              margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF454545),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(10),
-                        topRight: Radius.circular(10),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          constraints: BoxConstraints(maxWidth: 250),
-                          child: Text(
-                            item['title'] ?? 'No Title',overflow: TextOverflow.ellipsis,maxLines: 1,
-                            style: const TextStyle(color: Colors.white),
-                          ),
+              margin: const EdgeInsets.symmetric(horizontal: 20,vertical: 20),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: Colors.white24,
+                    width:1,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF454545),
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          topRight: Radius.circular(10),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 10, top: 10),
-                          child: Container(
-                            width: 30,
-                            height: 30,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            constraints: BoxConstraints(maxWidth: 250),
+                            child: Text(
+                              item['title'] ?? 'No Title',overflow: TextOverflow.ellipsis,maxLines: 1,
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.all(0),
+                            width: 45,
+                            height: 45,
                             decoration: BoxDecoration(
                               color: Colors.black,
-                              border: Border.all(color: Colors.white60),
-                              borderRadius: BorderRadius.circular(5),
+                              border: Border.all(color: Colors.white38),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                             child: IconButton(
                               icon: const Icon(
                                 Icons.more_vert,
                                 color: Colors.white,
-                                size: 12,
+                                size: 18,
                               ),
                               onPressed: () {
                                 _showCoverLetterOptions(context, index, _viewModel);
                               },
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: const BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(10),
-                        bottomRight: Radius.circular(10),
+                        ],
                       ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Summary',
-                          style: TextStyle(color: Colors.white60),
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: const BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(10),
+                          bottomRight: Radius.circular(10),
                         ),
-                    Consumer<CoverViewModelProvider>(
-                      builder: (context, viewModel, child){
-                          return Text(
-                            viewModel.coverLetters[index]['summary'] ?? 'No Summary',overflow: TextOverflow.ellipsis,maxLines: 2,
-                            style: const TextStyle(color: Colors.white),);
-                      }),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Summary',
+                            style: TextStyle(color: Colors.white60),
+                          ),
+                      Consumer<CoverViewModelProvider>(
+                        builder: (context, viewModel, child){
+                          final fullnessString = viewModel.coverLetters[index]['fullness'];
+                          final fullness = (fullnessString != null && fullnessString.isNotEmpty)
+                              ? double.tryParse(fullnessString) ?? 0.0
+                              : 0.0;
+                          print(fullness);
+                          print(fullnessString);
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  viewModel.coverLetters[index]['summary'] ?? 'No Summary',overflow: TextOverflow.ellipsis,maxLines: 2,
+                                  style: const TextStyle(color: Colors.white),),
+                                Container(
+                                  margin: EdgeInsets.only(right: 10),
+                                  height: 25,width: 25,
+                                  child: CircularProgressIndicator(
+                                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                                    value: fullness,
+                                    backgroundColor: Colors.white24,
+                                  ),
+                                ),
+                              ],
+                            );
+                        }),
 
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );

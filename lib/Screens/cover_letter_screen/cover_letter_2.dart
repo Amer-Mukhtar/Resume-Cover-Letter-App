@@ -2,15 +2,20 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:resume_maker/Screens/cover_letter_screen/cover_letter_1.dart';
+import '../../Models/model_cover.dart';
 import '../../Models/model_cover.dart';
 import '../../Utility/widgets/Textfield.dart';
 import '../../Utility/widgets/TextfieldSummary.dart';
+import '../templates/simple.dart';
+import '../templates_cover_letter/simple.dart';
 import 'cover_viewmode.dart';
 
 Color text = Colors.white;
 List photo = [
-  {'image': 'assets/images/template1.png', 'title': 'Black & White'},
-  {'image': 'assets/images/template2.png', 'title': 'Black & Blue'},
+  {'image': 'assets/images/coverletter1.png',
+    'title': 'Simple'},
+
 ];
 
 class CoverLetter extends StatefulWidget
@@ -51,14 +56,41 @@ class _CoverLetterState extends State<CoverLetter> with SingleTickerProviderStat
     textControllerLettermsg.addListener((){
       widget.coverLetterModel.summary = textControllerLettermsg.text;
       final CoverViewM = Provider.of<CoverViewModelProvider>(context, listen: false);
-      CoverViewM.SetSummary(widget.coverLetterModel,textControllerLettermsg.text);
+      CoverViewM.setSummary(widget.coverLetterModel,textControllerLettermsg.text);
+      CoverViewM.updateFullness2(widget.coverLetterModel);
 
     });
-    textControllerFirstName.addListener(() => widget.coverLetterModel.firstName = textControllerFirstName.text);
-    textControllerLastName.addListener(() => widget.coverLetterModel.lastName = textControllerLastName.text);
-    textControllerEmail.addListener(() => widget.coverLetterModel.email = textControllerEmail.text);
-    textControllerPhone.addListener(() => widget.coverLetterModel.phoneNumber = textControllerPhone.text);
-    textControllerAddress.addListener(() => widget.coverLetterModel.address = textControllerAddress.text);
+    textControllerFirstName.addListener(() {
+
+      widget.coverLetterModel.firstName = textControllerFirstName.text;
+      final CoverViewM = Provider.of<CoverViewModelProvider>(context, listen: false);
+      CoverViewM.SetFirstName(widget.coverLetterModel,textControllerFirstName.text);
+      CoverViewM.updateFullness2(widget.coverLetterModel);
+    } );
+    textControllerLastName.addListener(() {
+      widget.coverLetterModel.lastName = textControllerLastName.text;
+      final CoverViewM = Provider.of<CoverViewModelProvider>(context, listen: false);
+      CoverViewM.SetFirstLastName(widget.coverLetterModel,textControllerLastName.text);
+      CoverViewM.updateFullness2(widget.coverLetterModel);
+    } );
+    textControllerEmail.addListener((){
+      widget.coverLetterModel.email = textControllerEmail.text;
+      final CoverViewM = Provider.of<CoverViewModelProvider>(context, listen: false);
+      CoverViewM.SetEmail(widget.coverLetterModel,textControllerEmail.text);
+      CoverViewM.updateFullness2(widget.coverLetterModel);
+    });
+    textControllerPhone.addListener(() {
+      widget.coverLetterModel.phoneNumber = textControllerPhone.text;
+      final CoverViewM = Provider.of<CoverViewModelProvider>(context, listen: false);
+      CoverViewM.SetPhone(widget.coverLetterModel,textControllerPhone.text);
+      CoverViewM.updateFullness2(widget.coverLetterModel);
+    });
+    textControllerAddress.addListener(() {
+      widget.coverLetterModel.address = textControllerAddress.text;
+      final CoverViewM = Provider.of<CoverViewModelProvider>(context, listen: false);
+      CoverViewM.SetAddress(widget.coverLetterModel,textControllerAddress.text);
+      CoverViewM.updateFullness2(widget.coverLetterModel);
+    });
   }
 
   @override
@@ -220,7 +252,6 @@ class _CoverLetterState extends State<CoverLetter> with SingleTickerProviderStat
                         ),
                       ),
                     ),
-
                     // Intro Tab
                     Scaffold(
                       backgroundColor: Colors.black,
@@ -295,67 +326,73 @@ class _CoverLetterState extends State<CoverLetter> with SingleTickerProviderStat
                       ),
                     ),
                     // Template Tab
-                    Flexible(
-                      child: Scaffold(
-                        body: Container(
-                          color: Colors.black,
-                          child: GridView.builder(
-                            itemCount: photo.length,
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2, crossAxisSpacing: 0),
-                            itemBuilder: (context, index) {
-                              return Column(
+                    Scaffold(
+                      body: Container(
+                        color: Colors.black,
+                        child: GridView.builder(
+                          itemCount: photo.length,
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2, crossAxisSpacing: 0,mainAxisExtent: 250,),
+                          itemBuilder: (context, index) {
+                            return GestureDetector(
+                                onTap:  (){
+                                    handleTap(index, context);
+                                },
+                              child:Stack(
                                 children: [
-                                  Expanded(
-                                    child: Stack(
-                                      children: [
-                                        Container(
-                                          margin: const EdgeInsets.only(top: 20),
-                                          width: 150,
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(10),
-                                            image: DecorationImage(
-                                              image: AssetImage(photo[index]['image'] ?? ''),
-                                              fit: BoxFit.fitHeight,
-                                            ),
+                                  Container(
+                                    margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.02,left:20 ),
+                                    width: MediaQuery.of(context).size.width * 0.9,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(10),
+                                      image: DecorationImage(
+                                        image: AssetImage(photo[index]['image'] ?? ' '),
+                                        fit: BoxFit.fitHeight,
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned.fill(
+                                    child: Align(
+                                      alignment: Alignment.bottomCenter,
+                                      //shade
+                                      child: Container(
+                                        padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.height * 0.01),
+                                        width: MediaQuery.of(context).size.width * 0.8,
+                                        decoration: const BoxDecoration(
+                                          gradient: LinearGradient(
+                                            begin: Alignment.bottomCenter,
+                                            end: Alignment.topCenter,
+                                            colors: [Colors.black87, Colors.transparent],
+                                            stops: [0.0, 0.2],
                                           ),
                                         ),
-                                        Positioned(
-                                          top: 170,
-                                          width: 150,
-                                          child: Container(
-                                            padding: const EdgeInsets.only(bottom: 10),
-                                            decoration: const BoxDecoration(
-                                              gradient: LinearGradient(
-                                                begin: Alignment.bottomCenter,
-                                                end: Alignment.topCenter,
-                                                colors: [Colors.black, Colors.transparent],
-                                                stops: [0.0, 1.0],
-                                              ),
-                                            ),
-                                            child: Column(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceAround,
                                               children: [
-                                                Row(
-                                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                                  children: [
-                                                    Text(photo[index]['title'] ?? '',
-                                                        style: const TextStyle(color: Colors.white)),
-                                                    const Icon(CupertinoIcons.profile_circled,
-                                                        color: Colors.orange, size: 15),
-                                                  ],
+                                                Text(
+                                                  photo[index]['title'] ?? '',
+                                                  style: const TextStyle(color: Colors.white,fontWeight: FontWeight.w400,fontSize: 15),
+                                                ),
+                                                const Icon(
+                                                  CupertinoIcons.profile_circled,
+                                                  color: Colors.orange,
+                                                  size: 15,
                                                 ),
                                               ],
                                             ),
-                                          ),
-                                        )
-                                      ],
+                                          ],
+                                        ),
+                                      ),
                                     ),
-                                  )
+                                  ),
                                 ],
-                              );
-                            },
-                          ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -367,6 +404,41 @@ class _CoverLetterState extends State<CoverLetter> with SingleTickerProviderStat
         ),
       ),
     );
+  }
+  void handleTap(int index, BuildContext context) {
+
+    // Create a key for the dialog
+    final GlobalKey<State> dialogKey = GlobalKey<State>();
+
+    // Show the loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Container(
+          key: dialogKey,
+          color: Colors.black.withOpacity(0.1),
+          child: const Center(
+            child: CircularProgressIndicator(color: Colors.white,),
+          ),
+        );
+      },
+    );
+
+    // Generate the PDF
+    Future<void> generatePdf() async {
+      try {
+          createPdf_simple_CL(widget.coverLetterModel, 'preview', context);
+
+      }
+      catch (e)
+      {
+        print('Error generating PDF: $e');
+      }
+    }
+
+    // Start PDF generation
+    generatePdf();
   }
 
 }

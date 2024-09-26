@@ -26,7 +26,7 @@ class ResumeViewModelProvider extends ChangeNotifier {
       return {
         'title': resume.title,
         'job': resume.job,
-        'fullness': resume.fullness ?? 0,
+        'fullness': resume.fullness ?? 0.0,
       };
     }).toList();
   }
@@ -56,6 +56,7 @@ class ResumeViewModelProvider extends ChangeNotifier {
       languages: [],
       certifications: [],
       refrences: [],
+      achievements: [],
     );
 
     resumeBox.add(newResume);
@@ -78,7 +79,7 @@ class ResumeViewModelProvider extends ChangeNotifier {
     _currentResume = resume;
   }
 
-  // Delete a resume from Hive
+
   void delete(int index) {
     if (index >= 0 && index < _resumes.length) {
       resumeBox.deleteAt(index); // Delete from Hive
@@ -123,7 +124,7 @@ class ResumeViewModelProvider extends ChangeNotifier {
   // Calculate the fullness of the resume
   double calculateFullness(ResumeModel resume) {
     double count = 0;
-    double divider = 100 / 16;
+    double divider = 100 / 17;
 
     if (resume.title.isNotEmpty) count += divider;
     if (resume.job.isNotEmpty) count += divider;
@@ -140,6 +141,7 @@ class ResumeViewModelProvider extends ChangeNotifier {
     if (resume.skills.isNotEmpty) count += divider;
     if (resume.languages.isNotEmpty) count += divider;
     if (resume.certifications.isNotEmpty) count += divider;
+    if (resume.achievements.isNotEmpty) count += divider;
     if (resume.profile_image != null) count += divider;
     if (resume.refrences.isNotEmpty) count += divider;
 //  if (resume.profile_image != null && resume.profile_image!.existsSync()) count += divider;
@@ -414,4 +416,34 @@ class ResumeViewModelProvider extends ChangeNotifier {
     updatedResume!.profile_image=image;
     resumeBox.put(updatedResume!.key, updatedResume!);
   }
+
+
+  void addAchievments(int indexResume,Achievements achievements) {
+    if (_currentResume != null) {
+      final updatedResume = _resumes[indexResume];
+      updatedResume.achievements.add(achievements);
+      updateFullness(updatedResume);
+      resumeBox.put(updatedResume.key, updatedResume);
+      notifyListeners();
+    }
+  }
+  void deleteAchievments(int indexResume,int index) {
+    if (_currentResume != null && index >= 0 && index < _currentResume!.achievements.length) {
+      final updatedResume = _resumes[indexResume];
+      updatedResume!.achievements.removeAt(index);
+      updateFullness(updatedResume!);
+      resumeBox.put(updatedResume!.key, updatedResume!); // Update in Hive
+      notifyListeners();
+    }
+  }
+  void editAchievments(int indexResume,int index,Achievements Achievements) {
+
+    final updatedResume = _resumes[indexResume];
+    updatedResume!.achievements[index]=Achievements;
+    updateFullness(updatedResume!);
+    resumeBox.put(updatedResume!.key, updatedResume!); // Update in Hive
+    notifyListeners();
+
+  }
+
 }

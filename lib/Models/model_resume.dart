@@ -50,6 +50,9 @@ class ResumeModel extends HiveObject {
   @HiveField(14)
   Uint8List? resume_snapshot;
 
+  @HiveField(15)
+  List<Achievements> achievements;
+
   ResumeModel({
     required this.title,
     required this.job,
@@ -66,8 +69,10 @@ class ResumeModel extends HiveObject {
     this.languages = const [],
     this.certifications = const [],
     this.refrences = const [],
+    this.achievements=const [],
   });
 }
+
 
 @HiveType(typeId: 1)
 class Intro extends HiveObject {
@@ -233,4 +238,20 @@ class Reference extends HiveObject {
     required this.email,
     required this.phone,
   });
+
 }
+@HiveType(typeId: 10)
+class Achievements {
+  @HiveField(0)
+  String name;
+
+  @HiveField(1)
+  String Descirption;
+
+  Achievements({
+    required this.name,
+    required this.Descirption,
+
+  });
+}
+

@@ -32,9 +32,9 @@ Future<void> createPdf_simple(ResumeModel newResumeModel,String action,BuildCont
   pw.TextStyle SBText = pw.TextStyle(color: PdfColors.grey, fontSize: 10,fontWeight: pw.FontWeight.bold);
   pw.TextStyle MBText = pw.TextStyle(color: PdfColors.black, fontSize: 12, fontWeight: pw.FontWeight.bold);
   pw.TextStyle LBText = pw.TextStyle(color: PdfColors.black, fontSize: 14, fontWeight: pw.FontWeight.bold);
-  pw.TextStyle TitleText = pw.TextStyle(color: const PdfColor.fromInt(0xFF163852), fontSize: 26, fontWeight: pw.FontWeight.bold);
+  pw.TextStyle TitleText = pw.TextStyle(color:  PdfColors.black, fontSize: 26, fontWeight: pw.FontWeight.bold);
 
-  pw.TextStyle SubTitleText = pw.TextStyle(color: const PdfColor.fromInt(0xFF163852), fontSize: 20, fontWeight: pw.FontWeight.bold);
+  pw.TextStyle SubTitleText = pw.TextStyle(color: PdfColors.black, fontSize: 20, fontWeight: pw.FontWeight.bold);
 
   final ByteData dot = await rootBundle.load('assets/images/dot.png');
   dot0 = dot.buffer.asUint8List();
@@ -83,15 +83,16 @@ Future<void> createPdf_simple(ResumeModel newResumeModel,String action,BuildCont
       build: (pw.Context context) {
 
         return[
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.center,
-              children:
-              [
-                pw.Text(newResumeModel.intro!.firstName,style: TitleText),
-                pw.SizedBox(width: 5),
-                pw.Text(newResumeModel.intro!.lastName,style: TitleText)
-              ]
-          ),
+
+         pw.Container(padding: pw.EdgeInsets.only(top: 70),child:  pw.Row(
+             mainAxisAlignment: pw.MainAxisAlignment.center,
+             children:
+             [
+               pw.Text(newResumeModel.intro!.firstName,style: TitleText),
+               pw.SizedBox(width: 5),
+               pw.Text(newResumeModel.intro!.lastName,style: TitleText)
+             ]
+         ),),
           pw.Center(child: pw.Text(newResumeModel.job,style: SubTitleText)),
          pw.Container(margin: pw.EdgeInsets.symmetric(horizontal: 30),child:  pw.Divider(thickness: 0.5,color: PdfColors.black),),
           pw.Row( mainAxisAlignment: pw.MainAxisAlignment.center,children: [
@@ -144,6 +145,60 @@ Future<void> createPdf_simple(ResumeModel newResumeModel,String action,BuildCont
                 },
               ),
             ),
+          ),
+          pw.SizedBox(height: 20),
+          pw.Row(
+              children: [
+                pw.SizedBox(width: 10),
+                pw.Container(margin: pw.EdgeInsets.symmetric(horizontal: 30),child: pw.Text('KEY ACHIEVEMENTS',style: LBText),)
+              ]
+          ),
+          pw.Container(margin: pw.EdgeInsets.symmetric(horizontal: 30),child:  pw.Divider(thickness: 0.5,color: PdfColors.black),),
+          pw.Container(
+              constraints: const pw.BoxConstraints(maxWidth: 315),
+              child: pw.ListView.builder(
+                itemCount: newResumeModel.achievements.length,
+                itemBuilder: (context, index)
+                {
+                  final item = newResumeModel.achievements[index];
+                  return pw.Container(
+                    margin: pw.EdgeInsets.symmetric(horizontal: 30),
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.SizedBox(height: 10),
+                        pw.Container(
+                          constraints: const pw.BoxConstraints(maxWidth: 260),
+                          child: pw.Flexible(
+                              child: pw.Row(
+                                children: [
+                                 pw.Column(children: [
+                              pw.SizedBox(height: 4),pw.Container(
+                                     alignment: pw.Alignment.topLeft,
+                                     width: 4,
+                                     height: 8,
+                                     child: pw.Image(Bdot2),
+                                   ),
+                                 ]),
+                                 pw.SizedBox(width: 5),
+                                 pw.Row(children: [
+                                   pw.Text(item.name,style: MBText),
+                                   pw.Text(" "+item.Descirption)
+                                 ])
+                                ]
+                              )
+
+                          ),
+                        ),
+
+                        pw.SizedBox(height: 8),
+
+
+                      ],
+                    ),
+                  );
+                },
+              )
           ),
           pw.SizedBox(height: 20),
           pw.Row(
@@ -239,7 +294,8 @@ Future<void> createPdf_simple(ResumeModel newResumeModel,String action,BuildCont
             itemBuilder: (context, index)
             {
               final item = newResumeModel.education[index];
-              return pw.Container(margin: pw.EdgeInsets.symmetric(horizontal: 30),child: pw.Column(
+              return pw.Container(margin: pw.EdgeInsets.symmetric(horizontal: 30),
+                  child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Row(
@@ -289,9 +345,10 @@ pw.Container(margin: pw.EdgeInsets.symmetric(horizontal: 30),child:pw.Row(
   crossAxisAlignment: pw.CrossAxisAlignment.start,
   mainAxisAlignment:pw.MainAxisAlignment.start,
   children: [
+    if(newResumeModel.languages.isNotEmpty)
     pw.Column(children:
     [
-      pw.SizedBox(height: 4),
+      pw.SizedBox(height: 6),
       pw.Container(
         width: 4,
         height: 3,
@@ -301,6 +358,7 @@ pw.Container(margin: pw.EdgeInsets.symmetric(horizontal: 30),child:pw.Row(
     pw.SizedBox(width: 5),
     pw.Column(
         children: [
+          if(newResumeModel.languages.isNotEmpty)
           pw.Container(constraints: const pw.BoxConstraints(maxWidth: 200),child:  pw.Text('Languages: ',style: MBText ),)
         ]),
     pw.Container(
@@ -324,9 +382,10 @@ pw.Container(margin: pw.EdgeInsets.symmetric(horizontal: 30),child:pw.Row(
 ), ),
           pw.Container(margin: pw.EdgeInsets.symmetric(horizontal: 30),child: pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start,
               mainAxisAlignment:pw.MainAxisAlignment.start,children: [
+                if(newResumeModel.certifications.isNotEmpty)
                 pw.Column(children:
                 [
-                  pw.SizedBox(height: 4),
+                  pw.SizedBox(height: 6),
                   pw.Container(
                     width: 4,
                     height: 3,
@@ -336,7 +395,9 @@ pw.Container(margin: pw.EdgeInsets.symmetric(horizontal: 30),child:pw.Row(
                 pw.SizedBox(width: 5),
                 pw.Column(
                     children: [
-                      pw.Container(constraints: const pw.BoxConstraints(maxWidth: 200),child:  pw.Text('Certifications: ',style: MBText ),)
+                      if(newResumeModel.certifications.isNotEmpty)
+                      pw.Container(constraints: const pw.BoxConstraints(maxWidth: 200),
+                        child:  pw.Text('Certifications: ',style: MBText ),)
                     ]),
                 pw.Container(
                   width: double.infinity,
@@ -370,7 +431,7 @@ pw.Container(margin: pw.EdgeInsets.symmetric(horizontal: 30),child:pw.Row(
   final output = await getTemporaryDirectory();
   final file = File("${output.path}/Resume.pdf");
   newResumeModel.resume = file;
-  await OpenFile.open("${output.path}/Resume.pdf");
+  //await OpenFile.open("${output.path}/Resume.pdf");
   if (action == 'save')
   {
 

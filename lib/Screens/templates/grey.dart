@@ -33,7 +33,7 @@ Future<void> createPdf_grey(
       const pw.TextStyle(color: PdfColors.grey800, fontSize: 12);
 
   pw.TextStyle lText = pw.TextStyle(
-      color: PdfColors.black, fontSize: 20, fontWeight: pw.FontWeight.bold);
+      color: PdfColors.grey900, fontSize: 16, fontWeight: pw.FontWeight.bold,letterSpacing: 2.0);
 
   pw.TextStyle rsText =
       const pw.TextStyle(color: PdfColor.fromInt(0xFF163852), fontSize: 10);
@@ -90,10 +90,8 @@ Future<void> createPdf_grey(
       itemBuilder: (context, index) {
         final reference = references[index];
         return pw.Container(
-
-          padding: const pw.EdgeInsets.all(8),
-          decoration: const pw.BoxDecoration(),
-          constraints: const pw.BoxConstraints(maxWidth: 150),
+          padding: pw.EdgeInsets.all(8),
+          constraints: const pw.BoxConstraints(maxWidth: 180),
           child: pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
@@ -103,16 +101,16 @@ Future<void> createPdf_grey(
                 constraints: const pw.BoxConstraints(maxWidth: 130),
                 child: pw.Text('${reference.company}}',
                     style: const pw.TextStyle(
-                        fontSize: 8, color: PdfColors.black)),
+                        fontSize: 8, color: PdfColors.grey900)),
               ),
               pw.SizedBox(height: 5),
               pw.Text('Phone: ${reference.phone}',
                   style: const pw.TextStyle(
-                      fontSize: 8, color: PdfColors.black)),
+                      fontSize: 8, color: PdfColors.grey900)),
               pw.SizedBox(height: 5),
               pw.Text('Email: ${reference.email}',
                   style: const pw.TextStyle(
-                      fontSize: 8, color: PdfColors.black)),
+                      fontSize: 8, color: PdfColors.grey900)),
             ],
           ),
         );
@@ -137,13 +135,13 @@ Future<void> createPdf_grey(
                     color: PdfColors.grey,
                     child: pw.ConstrainedBox(
                         child: pw.Column(
-                          mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
+
                           crossAxisAlignment: pw.CrossAxisAlignment.start,
                           children: [
                             ///Contact/////////////
                            pw.Container(
-                               margin: pw.EdgeInsets.only(left: -20,top: -80),
-                             padding: pw.EdgeInsets.only(left: 20,top: 40,bottom: 40),
+                               margin: pw.EdgeInsets.only(left: -20,top: -20),
+                             padding: pw.EdgeInsets.only(left: 20,top: 28,bottom: 28),
                              color: PdfColors.white,
                              child: pw.Row(children: [
                               pw.Container(padding: pw.EdgeInsets.all(10),color: PdfColors.grey,child:  pw.Column(children: [
@@ -198,9 +196,10 @@ Future<void> createPdf_grey(
 
 
                             // Education
+                            pw.SizedBox(height: 10),
                             if (newResumeModel.education.isNotEmpty)
-                              pw.Text('Education', style: lText),
-
+                              pw.Text('EDUCATION', style: lText),
+                            pw.SizedBox(height: 10),
                             pw.ListView.builder(
                               itemCount: newResumeModel.education.length,
                               itemBuilder: (context, index) {
@@ -218,8 +217,9 @@ Future<void> createPdf_grey(
                                     ),
                                     pw.SizedBox(height: 5),
                                     pw.Row(children: [
-                                      pw.Text(item.schoolTitle+': ${item.from} ', style: sbText),
-                                      pw.Text(' - ${item.to}', style: sbText),
+                                      pw.Text(item.schoolTitle+': ${item.from} - ${item.to}', style: const pw.TextStyle(
+                                          fontSize: 12, color: PdfColors.grey900)),
+
                                     ]),
                                     pw.SizedBox(height: 4),
                                     // Add spacing between items
@@ -227,70 +227,73 @@ Future<void> createPdf_grey(
                                 );
                               },
                             ),
-                            if (newResumeModel.education.isNotEmpty)
-                              pw.Container(
-                                width: 190,
-                                height: 1,
-                                color: PdfColors.black,
-                              ),
+
 
 
 
                             // Skills Heading
+                            pw.SizedBox(height: 10),
+                            if (newResumeModel.refrences.isNotEmpty)
+                              pw.Container(
+                                width: 220,
+                                height: 2,
+                                color: PdfColors.grey600,),
                             if (newResumeModel.skills.isNotEmpty)
-                              pw.Text('Skills', style: lText),
+                              pw.SizedBox(height: 10),
+                              pw.Text('SKILLS', style: lText),
+                            pw.SizedBox(height: 10),
                             pw.ListView.builder(
                               itemCount: newResumeModel.skills.length,
                               itemBuilder: (context, index) {
-                                return pw.Column(children: [
-                                  pw.Row(
-                                    crossAxisAlignment:
-                                    pw.CrossAxisAlignment.start,
-                                    mainAxisAlignment:
-                                    pw.MainAxisAlignment.start,
-                                    children: [
-                                      
-                                    
-                                      pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start,children: [
-                                        pw.Container(
-                                          constraints: const pw.BoxConstraints(
-                                              maxWidth: 200),
-                                          child: pw.Text(
-                                            newResumeModel
-                                                .skills[index].skillName,
-                                            style: sText,
-                                          ),
+                                return pw.Row(
+                                  crossAxisAlignment:
+                                  pw.CrossAxisAlignment.start,
+                                  mainAxisAlignment:
+                                  pw.MainAxisAlignment.start,
+                                  children: [
+
+
+                                    pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start,children: [
+                                      pw.SizedBox(
+                                        height: 5,
+                                      ),
+                                      pw.Container(
+                                        constraints: const pw.BoxConstraints(
+                                            maxWidth: 200),
+                                        child: pw.Text(
+                                          newResumeModel
+                                              .skills[index].skillName,
+                                          style: sText,
                                         ),
-                                        pw.SizedBox(height: 6),
-                                        pw.Stack(
-                                          children: [
-                                            pw.Container(
-                                                decoration: pw.BoxDecoration(
-
-                                                    color: PdfColors.black,
-                                                    borderRadius: pw.BorderRadius.circular(4)
-                                                ),
-                                              height: 10,width: 200
-                                                ,
-                                            ),
-                                            pw.Container(
+                                      ),
+                                      pw.SizedBox(height: 6),
+                                      pw.Stack(
+                                        children: [
+                                          pw.Container(
                                               decoration: pw.BoxDecoration(
-                                                  color: PdfColors.white,
-                                                borderRadius: pw.BorderRadius.circular(4)
-                                              ),
-                                                height: 10,width: 100
-                                            ),
-                                          ]
-                                        )
 
-                                      ]
-                                      )
-                                    ],
-                                  ),
-                                  pw.SizedBox(
-                                    height: 3,
-                                  )
-                                ]);
+                                                  color: PdfColors.black,
+                                                  borderRadius: pw.BorderRadius.circular(4)
+                                              ),
+                                            height: 8,width: 200
+                                              ,
+                                          ),
+                                          pw.Container(
+                                            decoration: pw.BoxDecoration(
+                                                color: PdfColors.white,
+                                              borderRadius: pw.BorderRadius.circular(4)
+                                            ),
+                                              height: 8,width: newResumeModel.skills[index].level*2
+                                          ),
+
+                                        ]
+                                      ),
+
+
+                                    ]
+                                    )
+                                  ],
+                                );
                               },
                             ),
 
@@ -302,19 +305,57 @@ Future<void> createPdf_grey(
 
 
                             // Reference
+                            pw.SizedBox(height: 15),
                             if (newResumeModel.refrences.isNotEmpty)
                               pw.Container(
-                                width: 190,
-                                height: 1,
-                                color: PdfColors.black,),
+                                width: 220,
+                                height: 2,
+                                color: PdfColors.grey600,),
+                            pw.SizedBox(height: 15),
                             if (newResumeModel.refrences.isNotEmpty)
                               pw.Row(children: [
-                                pw.Text('REFRENCES', style: rlText)
+                                pw.Text('REFRENCES', style: lText)
                               ]),
 
                             pw.SizedBox(height: 10),
-                            buildReferencesList(
-                                context, newResumeModel.refrences)
+                            pw.ListView.builder(
+                              itemCount: newResumeModel.refrences.length,
+                              itemBuilder: (context, index) {
+                                final reference = newResumeModel.refrences[index];
+                                return pw.Container(
+                                  padding: pw.EdgeInsets.all(8),
+                                  width: 220,
+                                  constraints: const pw.BoxConstraints(maxWidth: 180),
+                                  child: pw.Column(
+                                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                    children: [
+                                      pw.Text(reference.name, style:  pw.TextStyle(fontSize: 10,font: pw.Font.helveticaBold(), )),
+                                      pw.SizedBox(height: 5),
+                                      pw.Container(
+                                        constraints: const pw.BoxConstraints(maxWidth: 130),
+                                        child: pw.Text('${reference.company}}',
+                                            style: const pw.TextStyle(
+                                                fontSize: 8, color: PdfColors.grey900)),
+                                      ),
+                                      pw.SizedBox(height: 5),
+                                      pw.Text('Phone: ${reference.phone}',
+                                          style: const pw.TextStyle(
+                                              fontSize: 8, color: PdfColors.grey900)),
+                                      pw.SizedBox(height: 5),
+                                      pw.Text('Email: ${reference.email}',
+                                          style: const pw.TextStyle(
+                                              fontSize: 8, color: PdfColors.grey900)),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                            pw.SizedBox(height: 10),
+                            if (newResumeModel.refrences.isNotEmpty)
+                              pw.Container(
+                                width: 220,
+                                height: 2,
+                                color: PdfColors.grey600,),
                           ],
                         ),
                         constraints: const pw.BoxConstraints(maxWidth: 10)))),
@@ -337,34 +378,27 @@ Future<void> createPdf_grey(
                           ),
                           pw.SizedBox(width: 10),
                           pw.Column(
-                            mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.Row(children: [
                                 pw.Container(
                                   constraints:
-                                  const pw.BoxConstraints(maxWidth: 100),
-                                  child: pw.Text(newResumeModel.intro!.firstName,
+                                  const pw.BoxConstraints(maxWidth: 200),
+                                  child: pw.Text(newResumeModel.intro!.firstName+" "+newResumeModel.intro!.lastName,
                                       style: const pw.TextStyle(
                                           fontSize: 26,
-                                          color: PdfColor.fromInt(0xFF163852))),
+                                          color: PdfColors.black)),
                                 ),
-                                pw.SizedBox(width: 5),
-                                pw.Container(
-                                  constraints:
-                                  const pw.BoxConstraints(maxWidth: 110),
-                                  child: pw.Text(newResumeModel.intro!.lastName,
-                                      style: const pw.TextStyle(
-                                          fontSize: 26,
-                                          color: PdfColor.fromInt(0xFF163852))),
-                                )
+
                               ]),
+                              pw.SizedBox(height: 5),
                               pw.Row(children: [
                                 pw.Container(
+                                  margin: pw.EdgeInsets.only(left: -20),
                                   constraints:
                                   const pw.BoxConstraints(maxWidth: 250),
-                                  child: pw.Text(newResumeModel.job,
+                                  child: pw.Text(newResumeModel.job.toUpperCase(),
                                       style: const pw.TextStyle(
-                                          fontSize: 12, color: PdfColors.grey600)
+                                          fontSize: 12, color: PdfColors.grey700)
                                   ),
                                 ),
                               ]),
@@ -375,8 +409,9 @@ Future<void> createPdf_grey(
                     pw.Container(
                       width: 315,
                       height: 2,
-                      color: PdfColors.black,),
-                    pw.Row(children: [pw.Text('Profile', style: rlText)]),
+                      color: PdfColors.grey300,),
+                    pw.SizedBox(height: 10),
+                    pw.Row(children: [pw.Text('PROFILE', style: lText)]),
 
                     pw.Container(
                         margin: const pw.EdgeInsets.symmetric(
@@ -388,13 +423,16 @@ Future<void> createPdf_grey(
                         )),
 
                     //////// Work Experience/////////////////////////////////////
+                    pw.SizedBox(height: 10),
                     if (newResumeModel.experience.isNotEmpty)
                       pw.Container(
                           width: 315,
                           height: 2,
-                          color: PdfColors.black,),
+                          color: PdfColors.grey300,),
                     if (newResumeModel.experience.isNotEmpty)
-                      pw.Row(children: [pw.Text('Experience', style: rlText)]),
+                      pw.SizedBox(height: 10),
+                    if (newResumeModel.experience.isNotEmpty)
+                      pw.Row(children: [pw.Text('EXPERIENCE', style: lText)]),
 
                     pw.SizedBox(height: 10),
 
@@ -525,6 +563,12 @@ Future<void> createPdf_grey(
                             );
                           },
                         )),
+                    pw.SizedBox(height: 10),
+                    if (newResumeModel.experience.isNotEmpty)
+                      pw.Container(
+                        width: 315,
+                        height: 2,
+                        color: PdfColors.grey300,),
                   ],
                 ),
               ),
@@ -536,13 +580,14 @@ Future<void> createPdf_grey(
   );
 
   final pdfData = await pdf.save();
-
   final output = await getTemporaryDirectory();
   final file = File("${output.path}/Resume.pdf");
   newResumeModel.resume = file;
-  await OpenFile.open("${output.path}/Resume.pdf");
-  if (action == 'save') {
-  } else if (action == 'preview') {
+  //await OpenFile.open("${output.path}/Resume.pdf");
+  if (action == 'save')
+  {
+  }
+  else if (action == 'preview') {
     await file.writeAsBytes(pdfData);
     final pdfDoc = await pdfx.PdfDocument.openFile(file.path);
     final page = await pdfDoc.getPage(1);
