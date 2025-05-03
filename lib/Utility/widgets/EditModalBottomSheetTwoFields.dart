@@ -7,12 +7,12 @@ class EditItemSheet extends StatelessWidget {
   final void Function(String value1, String value2) onSave;
 
   const EditItemSheet({
-    Key? key,
+    super.key,
     required this.title,
     required this.initialValue1,
     required this.initialValue2,
     required this.onSave,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context)
@@ -50,7 +50,7 @@ class EditItemSheet extends StatelessWidget {
                       alignment: Alignment.topLeft,
                       child: Text(
                         title,
-                        style: TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Colors.white),
                       ),
                     ),
                     const SizedBox(height: 5),
@@ -73,7 +73,7 @@ class EditItemSheet extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 15),
-                    Align(
+                    const Align(
                       alignment: Alignment.topLeft,
                       child: Text(
                         'Enter Level',

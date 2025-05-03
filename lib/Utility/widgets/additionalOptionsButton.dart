@@ -4,14 +4,14 @@ class AdditonalOptions extends StatelessWidget {
   final void Function() onPressed;
 
   const AdditonalOptions({
-    Key? key,
+    super.key,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(0),
+      padding: const EdgeInsets.all(0),
       width: 45,
       height: 45,
       decoration: BoxDecoration(

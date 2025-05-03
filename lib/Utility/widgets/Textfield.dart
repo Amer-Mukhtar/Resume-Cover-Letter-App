@@ -9,13 +9,13 @@ class CustomTextField extends StatelessWidget {
   final TextInputType KeyboardType;
 
   const CustomTextField({
-    Key? key,
+    super.key,
     required this.labelText,
     required this.controller,
     required this.hintText,
     required this.onChanged,
     this.margin = const EdgeInsets.only(left: 20, right: 20, top: 10), required this.KeyboardType,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -44,13 +44,13 @@ class CustomTextField extends StatelessWidget {
               keyboardType: KeyboardType,
               decoration: InputDecoration(
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
+                  borderSide: const BorderSide(color: Colors.grey),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 hintText: hintText,
                 floatingLabelBehavior: FloatingLabelBehavior.never,
                 focusedBorder:  OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.blue,),
+                  borderSide: const BorderSide(color: Colors.blue,),
                   borderRadius: BorderRadius.circular(10)
                 ),
                 border: const OutlineInputBorder(),

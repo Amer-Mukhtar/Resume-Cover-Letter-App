@@ -11,7 +11,7 @@ class CustomSummaryFieldNON extends StatelessWidget {
   final Color borderColor;
 
   const CustomSummaryFieldNON({
-    Key? key,
+    super.key,
     required this.labelText,
     required this.controller,
     required this.hintText,
@@ -20,7 +20,7 @@ class CustomSummaryFieldNON extends StatelessWidget {
     required this.height ,
     this.borderWidth = 1.0,
     required this.borderColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class CustomSummaryFieldNON extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              Text('',style:const TextStyle(
+              const Text('',style:TextStyle(
                 color: Colors.red,
                 fontWeight: FontWeight.bold,
               ), )
@@ -69,7 +69,7 @@ class CustomSummaryFieldNON extends StatelessWidget {
                 ),
 
                 focusedBorder:  OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue,),
+                    borderSide: const BorderSide(color: Colors.blue,),
                     borderRadius: BorderRadius.circular(10)
                 ),
                 floatingLabelBehavior: FloatingLabelBehavior.never,

@@ -14,14 +14,14 @@ Container reorderButton(BuildContext context) {
     ),
     child: Center(
       child: IconButton(
-        icon:  Icon(
+        icon:  const Icon(
           CupertinoIcons.arrow_up_arrow_down,
           color: Colors.blue,
           size: 20,
         ),
         onPressed: () {
           ScaffoldMessenger.of(context).showSnackBar(
-            AlertSnackBar('Press and hold to position it',Color(0xFF454545),Colors.blue),
+            AlertSnackBar('Press and hold to position it',const Color(0xFF454545),Colors.blue),
           );
         },
       ),

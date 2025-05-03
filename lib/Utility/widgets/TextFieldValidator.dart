@@ -13,7 +13,7 @@ class CustomTextFieldValidate extends StatelessWidget {
 
 
   const CustomTextFieldValidate({
-    Key? key,
+    super.key,
     required this.labelText,
     required this.controller,
     required this.hintText,
@@ -22,7 +22,7 @@ class CustomTextFieldValidate extends StatelessWidget {
     this.margin = const EdgeInsets.only(left: 5, right: 0, top: 0),
     required this.keyboardType,
     this.validator, this.inputFormatter, // Add validator parameter
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -39,11 +39,11 @@ class CustomTextFieldValidate extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: 5,),
+        const SizedBox(height: 5,),
         Theme(
 
           data: ThemeData.dark(),
-          child: Container(
+          child: SizedBox(
             width: double.infinity,
             child: TextFormField(
 
@@ -55,19 +55,19 @@ class CustomTextFieldValidate extends StatelessWidget {
 
               decoration: InputDecoration(
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
+                  borderSide: const BorderSide(color: Colors.grey),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                errorBorder: OutlineInputBorder( borderSide: BorderSide(color: Colors.red),
+                errorBorder: OutlineInputBorder( borderSide: const BorderSide(color: Colors.red),
                   borderRadius: BorderRadius.circular(10), ),
                 focusedErrorBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.redAccent),
+                  borderSide: const BorderSide(color: Colors.redAccent),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 hintText: hintText,
                 floatingLabelBehavior: FloatingLabelBehavior.never,
                 focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.blue),
+                  borderSide: const BorderSide(color: Colors.blue),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 border: const OutlineInputBorder(),

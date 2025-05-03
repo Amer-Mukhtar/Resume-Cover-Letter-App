@@ -8,7 +8,7 @@ SnackBar AlertSnackBar(String message,Color color,Color color1)
     elevation: 30,
     behavior: SnackBarBehavior.floating,
     content: Container(
-      margin: EdgeInsets.only(bottom: 82),
+      margin: const EdgeInsets.only(bottom: 82),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: color,

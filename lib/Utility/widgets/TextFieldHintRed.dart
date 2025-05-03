@@ -11,13 +11,13 @@ class CustomTextFieldHintRed extends StatelessWidget
   final Color color;
 
   const CustomTextFieldHintRed({
-    Key? key,
+    super.key,
     required this.labelText,
     required this.controller,
     required this.hintText,
     required this.onChanged,
     this.margin = const EdgeInsets.only(left: 20, right: 20, top: 10), required this.KeyboardType, required this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,7 @@ class CustomTextFieldHintRed extends StatelessWidget
               ),
               Container(
 
-                child: Text('*',style:const TextStyle(
+                child: const Text('*',style:TextStyle(
                   color: Colors.red, // Replace with your 'text' color variable
                   fontWeight: FontWeight.bold,
                 ) ,),
@@ -66,7 +66,7 @@ class CustomTextFieldHintRed extends StatelessWidget
                 hintText: hintText,
                 floatingLabelBehavior: FloatingLabelBehavior.never,
                 focusedBorder:  OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue,),
+                    borderSide: const BorderSide(color: Colors.blue,),
                     borderRadius: BorderRadius.circular(10)
                 ),
                 border: const OutlineInputBorder(),

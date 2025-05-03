@@ -1,8 +1,6 @@
-import 'dart:io';
 
 import 'package:hive/hive.dart';
 import '../../Models/model_cover.dart';
-import '../../Models/model_resume.dart';
 
 class CLModelAdapter extends TypeAdapter<CoverLetterModel> {
   @override
