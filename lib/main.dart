@@ -16,7 +16,7 @@ import 'Utility/Adapters/ResumeAdapters.dart';
 
 
 void main() async {
-  Gemini.init(apiKey: gemini);
+  //Gemini.init(apiKey: gemini);
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Hive
