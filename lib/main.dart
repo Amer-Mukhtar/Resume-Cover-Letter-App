@@ -16,10 +16,8 @@ import 'Utility/Adapters/ResumeAdapters.dart';
 
 
 void main() async {
-  //Gemini.init(apiKey: gemini);
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Hive
   await Hive.initFlutter();
 
   Hive.registerAdapter(ResumeModelAdapter());
@@ -32,11 +30,9 @@ void main() async {
   Hive.registerAdapter(CertificationAdapter());
   Hive.registerAdapter(ReferenceAdapter());
   Hive.registerAdapter(AchievementsAdapter());
-  // Open the box for resumes
   var resumeBox = await Hive.openBox<ResumeModel>('resumes');
 
   Hive.registerAdapter(CLModelAdapter());
-  var clBox =await Hive.openBox<CoverLetterModel>('cover_letters');
 
   runApp(
     MultiProvider(
