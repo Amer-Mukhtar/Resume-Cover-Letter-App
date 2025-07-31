@@ -1,5 +1,3 @@
-
-
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -24,7 +22,6 @@ import '../../Views/templates_resumes/Resume 2.dart';
 import '../../Views/templates_resumes/Resume 3.dart';
 import '../../Views/templates_resumes/Resume 4.dart';
 import '../../Views/templates_resumes/resume_5.dart';
-
 List photo= [
   {'image':'assets/images/templates/resumes/resume_1.png',
     'title':'Resume 1'},
@@ -110,7 +107,7 @@ class _Resume_DetailsState extends State<Resume_Details> with SingleTickerProvid
     } else if (index == 1) {
       resumeState.updateBorderColorContact(Colors.red);
       ScaffoldMessenger.of(context).showSnackBar(
-        AlertSnackBar('Required fields cannot be left empty.', Colors.red, Colors.white),
+        AlertSnackBar('Required fields cannot be left empty', Colors.red, Colors.white),
       );
       Future.delayed(const Duration(seconds: 3), () {
         resumeState.updateBorderColorContact(Colors.grey);
