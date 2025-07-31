@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gemini/flutter_gemini.dart';
-import 'package:resume_maker/Models/model_cover.dart';
 import 'package:resume_maker/Utility/Adapters/CLAdapters.dart';
 import 'Models/model_resume.dart';
-import 'Views/Gpt/gpt.dart';
 import 'Views/Home_Screen/home_screen.dart';
 import 'Views/add_resume_screen/resume_2.dart';
 import 'ViewModels/resume_view_model.dart';
 import 'ViewModels/cover_viewmode.dart';
 import 'Utility/Adapters/ResumeAdapters.dart';
-
-
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,7 +48,6 @@ void main() async {
     ),
   );
 }
-//is thwe commit working now
 class MainApp extends StatefulWidget {
   const MainApp({super.key});
 
