@@ -26,38 +26,38 @@ import '../../Views/templates_resumes/Resume 4.dart';
 import '../../Views/templates_resumes/resume_5.dart';
 
 List photo= [
-  {'image':'assets/images/templates_resumes/resumes/resume_1.png',
+  {'image':'assets/images/templates/resumes/resume_1.png',
     'title':'Resume 1'},
-  {'image':'assets/images/templates_resumes/resumes/resume_2.png',
+  {'image':'assets/images/templates/resumes/resume_2.png',
     'title': 'Resume 2'},
-  {'image':'assets/images/templates_resumes/resumes/resume_3.png',
+  {'image':'assets/images/templates/resumes/resume_3.png',
     'title': 'Resume 3'
   },
-  {'image':'assets/images/templates_resumes/resumes/resume_4.png',
+  {'image':'assets/images/templates/resumes/resume_4.png',
     'title': 'Resume 4'
   },
-  {'image':'assets/images/templates_resumes/resumes/resume_5.png',
+  {'image':'assets/images/templates/resumes/resume_5.png',
     'title': 'Resume 5'
   },
-  {'image':'assets/images/templates_resumes/resumes/resume_6.png',
+  {'image':'assets/images/templates/resumes/resume_6.png',
     'title': 'Resume 6'
   },
-  {'image':'assets/images/templates_resumes/resumes/resume_7.png',
+  {'image':'assets/images/templates/resumes/resume_7.png',
     'title': 'Resume 7'
   },
-  {'image':'assets/images/templates_resumes/resumes/resume_8.png',
+  {'image':'assets/images/templates/resumes/resume_8.png',
     'title': 'Resume 8'
   },
-  {'image':'assets/images/templates_resumes/resumes/resume_9.png',
+  {'image':'assets/images/templates/resumes/resume_9.png',
     'title': 'Resume 9'
   },
-  {'image':'assets/images/templates_resumes/resumes/resume_10.png',
+  {'image':'assets/images/templates/resumes/resume_10.png',
     'title': 'Resume 10'
   },
-  {'image':'assets/images/templates_resumes/resumes/resume_11.png',
+  {'image':'assets/images/templates/resumes/resume_11.png',
     'title': 'Resume 11'
   },
-  {'image':'assets/images/templates_resumes/resumes/resume_12.png',
+  {'image':'assets/images/templates/resumes/resume_12.png',
     'title': 'Resume 12'
   },
 

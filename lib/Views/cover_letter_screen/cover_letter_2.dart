@@ -10,7 +10,7 @@ import '../../ViewModels/cover_viewmode.dart';
 
 Color text = Colors.white;
 List photo = [
-  {'image': 'assets/images/templates_resumes/cover_letters/coverletter1.png',
+  {'image': 'assets/images/templates/cover_letters/coverletter1.png',
     'title': 'Simple'},
 
 ];
