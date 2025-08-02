@@ -97,7 +97,7 @@ class _Template_PreviewState extends State<Template_Preview> {
     final filePath = widget.resumeModel.resume?.path;
     if (filePath != null && File(filePath).existsSync()) {
       final xfile = XFile(filePath);
-      await Share.shareXFiles([xfile], text: 'Check out my resume!');
+      await Share.shareXFiles([xfile], text: 'Check out my Resume!');
     } else {
       print('File does not exist');
     }

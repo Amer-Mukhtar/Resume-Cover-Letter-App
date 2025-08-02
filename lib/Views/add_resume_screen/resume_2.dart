@@ -62,7 +62,6 @@ List photo= [
 Color background=Colors.black;
 Color text=Colors.white;
 
-
 class Resume_Details extends StatefulWidget
 {
   final ResumeModel newResumeMdoel;

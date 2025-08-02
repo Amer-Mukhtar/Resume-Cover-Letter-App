@@ -7,18 +7,15 @@ import 'package:url_launcher/url_launcher.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
-
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
   var scaffoldKey = GlobalKey<ScaffoldState>();
-
   IconData notification_active = Icons.notifications_active;
   IconData notification_disabled = Icons.notifications_off;
   IconData current_notification =Icons.notifications_active;
-
 
   @override
   Widget build(BuildContext context) {
