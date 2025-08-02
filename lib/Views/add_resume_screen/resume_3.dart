@@ -18,7 +18,6 @@ class _Template_PreviewState extends State<Template_Preview> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         height: 100,
@@ -47,7 +46,7 @@ class _Template_PreviewState extends State<Template_Preview> {
               children: [
 
                 Text(
-                  'Share ',
+                  'Share',
                   style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500,fontSize: 16),
                 ),
                 SizedBox(width: 5),
