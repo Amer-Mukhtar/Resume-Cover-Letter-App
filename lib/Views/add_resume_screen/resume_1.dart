@@ -88,7 +88,7 @@ class _Resume_ListState extends State<Resume_List> {
               child: const Icon(FontAwesomeIcons.boxOpen, color: Colors.white, size: 80),
             ),
             const SizedBox(height: 5),
-            const Text('Nothing Here', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            const Text('Not added yet', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             const SizedBox(height: 5),
             const Text('Looks like nothing is added yet', style: TextStyle(color: Colors.white60)),
           ],
