@@ -90,7 +90,7 @@ class _Resume_ListState extends State<Resume_List> {
             const SizedBox(height: 5),
             const Text('Not added yet', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             const SizedBox(height: 5),
-            const Text('Looks like nothing is added yet', style: TextStyle(color: Colors.white60)),
+            const Text('Looks like nothing has been added yet.', style: TextStyle(color: Colors.white60)),
           ],
         ),
       ) :ReorderableListView(
