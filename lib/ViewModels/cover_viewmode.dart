@@ -4,9 +4,12 @@ import '../Models/model_cover.dart';
 import '../Views/cover_letter_screen/cover_letter_2.dart';
 
 class CoverViewModelProvider extends ChangeNotifier {
-  final Box<CoverLetterModel> _coverLettersBox = Hive.box<CoverLetterModel>('cover_letters');
+  final Box<CoverLetterModel> coverLettersBox;
 
-  List<CoverLetterModel> get _coverLetters => _coverLettersBox.values.toList();
+  // Constructor to accept the box from outside
+  CoverViewModelProvider(this.coverLettersBox);
+
+  List<CoverLetterModel> get _coverLetters => coverLettersBox.values.toList();
 
   // Save changes to Hive when summary is updated
   void setSummary(CoverLetterModel CLM, String summary) {
@@ -53,16 +56,17 @@ class CoverViewModelProvider extends ChangeNotifier {
   // Add a new cover letter and save it in Hive
   void addNewCover(BuildContext context) {
     final newCover = CoverLetterModel(
-        title: '-',
-        summary: '',
-        firstName: '',
-        lastName: '',
-        phoneNumber: '',
-        address: '',
-        email: '', fullness: 0.0
+      title: '-',
+      summary: '',
+      firstName: '',
+      lastName: '',
+      phoneNumber: '',
+      address: '',
+      email: '',
+      fullness: 0.0,
     );
 
-    _coverLettersBox.add(newCover);  // Add to Hive
+    coverLettersBox.add(newCover);  // Add to Hive
 
     Navigator.push(
       context,
@@ -75,7 +79,7 @@ class CoverViewModelProvider extends ChangeNotifier {
   // Delete a cover letter from Hive
   void delete(int index) {
     if (index >= 0 && index < _coverLetters.length) {
-      _coverLettersBox.deleteAt(index);  // Delete from Hive
+      coverLettersBox.deleteAt(index);  // Delete from Hive
       notifyListeners();
     }
   }
@@ -118,7 +122,7 @@ class CoverViewModelProvider extends ChangeNotifier {
         address: _coverLetters[index].address,
         fullness: _coverLetters[index].fullness,
       );
-      _coverLettersBox.putAt(index, _coverLetters[index]); // Update Hive
+      coverLettersBox.putAt(index, _coverLetters[index]); // Update Hive
       notifyListeners();
     }
   }

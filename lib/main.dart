@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 import 'package:resume_maker/Utility/Adapters/CLAdapters.dart';
+import 'Models/model_cover.dart';
 import 'Models/model_resume.dart';
 import 'Views/Home_Screen/home_screen.dart';
 import 'Views/add_resume_screen/resume_2.dart';
@@ -25,8 +27,10 @@ void main() async {
   Hive.registerAdapter(ReferenceAdapter());
   Hive.registerAdapter(AchievementsAdapter());
   var resumeBox = await Hive.openBox<ResumeModel>('resumes');
+  var CLBox = await Hive.openBox<CoverLetterModel>('cover_letter');
 
   Hive.registerAdapter(CLModelAdapter());
+  //await dotenv.load(fileName: ".env");
 
   runApp(
     MultiProvider(
@@ -35,7 +39,7 @@ void main() async {
           create: (context) => ResumeViewModelProvider(resumeBox: resumeBox),
         ),
         ChangeNotifierProvider(
-          create: (context) => CoverViewModelProvider(),
+          create: (context) => CoverViewModelProvider(CLBox),
         ),
         ChangeNotifierProvider(
           create: (context) => ResumeState(),
