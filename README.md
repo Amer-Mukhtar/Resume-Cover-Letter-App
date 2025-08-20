@@ -33,6 +33,16 @@ It also integrates the Gemini API to provide AI-powered assistance in tailoring 
 
 ---
 
+
+## Demo
+
+Watch the video demo:
+
+https://github.com/user-attachments/assets/07523cf8-5d17-4510-8c0b-fffc223dd3dd
+
+
+---
+
 ## Project Structure
 
     lib/
@@ -48,7 +58,7 @@ It also integrates the Gemini API to provide AI-powered assistance in tailoring 
 
 1) Clone the repository
 
-    git clone https://github.com/yourusername/resume-cover-letter-maker.git
+    git clone 
     cd resume-cover-letter-maker
 
 2) Install dependencies
@@ -65,10 +75,3 @@ It also integrates the Gemini API to provide AI-powered assistance in tailoring 
     flutter run
 
 ---
-
-
-## Demo
-
-Watch the video demo:
-
-https://github.com/user-attachments/assets/07523cf8-5d17-4510-8c0b-fffc223dd3dd
