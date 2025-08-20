@@ -36,11 +36,10 @@ It also integrates the Gemini API to provide AI-powered assistance in tailoring 
 ## Project Structure
 
     lib/
-    │── models/        # Data models (Resume, Cover Letter, User, etc.)
+    │── models/        # Data models (Resume, Cover Letter)
     │── viewmodels/    # Business logic & state handling
-    │── views/         # UI screens (resume editor, cover letter editor, templates, preview)
-    │── widgets/       # Reusable UI components
-    │── services/      # Storage, PDF generation, AI integration, utilities
+    │── views/         # UI screens (resume, cover letter, templates)
+    │── utility/       # widgets, themes, adapters(for hive),
     │── main.dart      # App entry point
 
 ---
@@ -67,15 +66,6 @@ It also integrates the Gemini API to provide AI-powered assistance in tailoring 
 
 ---
 
-## Screenshots
-
-| Resume Editor | Cover Letter Editor | PDF Preview |
-| --- | --- | --- |
-| ![Resume Editor](screenshots/resume_editor.png) | ![Cover Letter Editor](screenshots/cover_letter_editor.png) | ![PDF Preview](screenshots/pdf_preview.png) |
-
-Place actual images in a `screenshots/` folder at the project root and update the file names as needed.
-
----
 
 ## Demo
 
